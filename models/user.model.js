@@ -7,7 +7,7 @@ const mongoose=require('mongoose');
    password:{type: String,required: true},
    gender:{type: String,required: true},
    type: { type: String, default: 'patient', enum: ["patient", "doctor", "admin"] , required:true },
-   doctorSpecification:{type:{specification:String,role:String ,default:"human" ,enum:["human","veterinary"]}},
+//    doctorSpecification:{type:{specification:String,role:String ,default:"human" ,enum:["human","veterinary"]}},
    imageUrl:{type:String},
    mobilePhone:{type:String},
    registrationDate:{type:String}
