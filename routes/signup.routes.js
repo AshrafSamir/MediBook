@@ -1,5 +1,5 @@
 const signupRoute = require("express").Router();
-const {signup} = require('../controllers/signup.controller')
+const {signup,createUser} = require('../controllers/signup.controller')
 const multer = require('multer');
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -21,6 +21,7 @@ var storage = multer.diskStorage({
   }
   const userImage = multer({dest:'uploads/profileImages',storage , fileFilter });
 signupRoute.post('/signup',userImage.single("profileImage"),signup)
+signupRoute.post('/createUser',userImage.single("profileImage"),createUser)
 
 
 

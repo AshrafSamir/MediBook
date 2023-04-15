@@ -33,11 +33,47 @@ const signup=async (req,res)=>{
         }
     }
 }
-const createUser=(req,res)=>{
-    res.json({message:"helloCreateUser"})
+const createUser=async (req,res)=>{
+    const { name, username, email, password, gender, type, mobilePhone, clinicAddress, doctorSpecification } =req.body;
+    let token = req.header("auth")
+    console.log("token : ",token);
+    if (token) {
+        await jwt.verify(token, "admin", async (err, verifiedData) => {
+            if (err) {
+                res.json({ message: "error in token" });
+            }
+            else {
+                if (verifiedData) {
+                    console.log(verifiedData);
+                    let user = await userModel.findOne({$or:[{username},{email},{mobilePhone}]});
+                    if(user){
+                        res.json({message:"already logged"});
+                    }
+                    else{
+                        await userModel.insertMany({...req.body,imageUrl:`http://localhost:3000/${req.file.path}`});
+                        user = await userModel.findOne({username},{password:0})
+                        if(user.type==="doctor"){
+                            await doctorInfoModel.insertMany({doctorId:user._id,clinicAddress,doctorSpecification});
+                            let doctorInfo = await doctorInfoModel.findOne({doctorId:user._id},{_id:0});         
+                            console.log("doctor",doctorInfo);   
+                            user.doctorInfo=doctorInfo;
+                            res.json({message:"User create succesfully",user:{...user._doc,...doctorInfo._doc,token}});
+                        }
+                        else{
+                            res.json({message:"User create succesfully",user:{...user._doc}})
+                        }                    
+                    }
+                }
+            }
+        }
+        )
+    }
+    else {
+        res.json({ message: "there is no tokens", status: "failed" })
+    }
 }
 const deleteUser=(req,res)=>{
     res.json({message:"helloDeleteUser"})
 }
 
-module.exports={signup}
+module.exports={signup,createUser}
