@@ -2,9 +2,10 @@ const jwt = require("jsonwebtoken");
 const userModel = require('../models/user.model')
 const doctorInfoModel = require('../models/doctorInfo.model')
 const bcrypt = require("bcrypt");
-const multer = require("multer");
+const {check , validationResult} = require('express-validator');
+
 const signup=async (req,res)=>{
-    const { name, username, email, password, gender, type, imageUrl, mobilePhone, clinicAddress, doctorSpecification } =req.body;
+    const { name, username, email, password, gender, type, mobilePhone, clinicAddress, doctorSpecification } =req.body;
     const saltOrRounds = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, saltOrRounds);
     req.body.password = hashedPassword
@@ -15,7 +16,7 @@ const signup=async (req,res)=>{
         res.json({message:"already logged"})
     }
     else{
-        await userModel.insertMany(req.body);
+        await userModel.insertMany({...req.body,imageUrl:`http://localhost:3000/${req.file.path}`});
         user = await userModel.findOne({username},{password:0})
         let token = await jwt.sign({role:user.type , username : user.username  },user.type)
         res.setHeader("auth",token)
