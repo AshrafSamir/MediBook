@@ -15,7 +15,7 @@ const signin = async (req, res) => {
     if (match) {
       let token = await jwt.sign(
         { role: user.type, username: user.username, _id: user._id },
-        process.env.JWT_SECRET
+        "thisisasecretformyapp"
       );
       res.setHeader("auth", token);
       res.json({

@@ -4,9 +4,11 @@ const userModel = require("../models/user.model");
 const auth = async (req, res, next) => {
   try {
     const token = req.header("auth");
-    const { username, _id } = await jwt.verify(token, process.env.JWT_SECRET);
+    // console.log(token);
+    const { username, _id } = await jwt.verify(token, "thisisasecretformyapp");
+    // console.log(_id,username);
     let user = await userModel.findOne({ _id });
-
+    // console.log(user);
     if (!user) {
       throw new Error();
     }
