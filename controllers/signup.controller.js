@@ -57,7 +57,7 @@ const createUser=async (req,res)=>{
                             let doctorInfo = await doctorInfoModel.findOne({doctorId:user._id},{_id:0});         
                             console.log("doctor",doctorInfo);   
                             user.doctorInfo=doctorInfo;
-                            res.json({message:"User create succesfully",user:{...user._doc,...doctorInfo._doc,token}});
+                            res.json({message:"User create succesfully",user:{...user._doc,...doctorInfo._doc}});
                         }
                         else{
                             res.json({message:"User create succesfully",user:{...user._doc}})
@@ -76,4 +76,57 @@ const deleteUser=(req,res)=>{
     res.json({message:"helloDeleteUser"})
 }
 
-module.exports={signup,createUser}
+const getAllUsers=async (req,res)=>{
+    let users = await userModel.find({});
+    if(users.length){
+        res.json(users);
+    }
+    else{
+        res.json({message:"there is no users"});
+    }
+}
+
+const getUserByid= async(req,res)=>{
+    let _id = req.params.id;
+    let user = await userModel.findOne({_id});
+    if(!user){
+        res.json({message:"invalid user ID"});
+    }
+    else{
+        res.json({user});
+    }
+}
+
+const getAllDoctors=async (req,res)=>{
+    let doctors = await userModel.find({type:"doctor"});
+    if(doctors.length){
+        res.json(doctors);
+    }
+    else{
+        res.json({message:"there is no doctors"});
+    }
+}
+
+const getAllAdmins=async(req,res)=>{
+    let admins = await userModel.find({type:"admin"});
+    if(admins.length){
+        res.json(admins);
+    }
+    else{
+        res.json({message:"there is no admins"});
+    }
+    
+}
+
+const getAllClients=async(req,res)=>{
+    let clients = await userModel.find({type:"patient"});
+    if(clients.length){
+        res.json(clients);
+    }
+    else{
+        res.json({message:"there is no clients"});
+    }
+    
+}
+
+module.exports={signup,createUser,getAllUsers,getUserByid,getAllDoctors,getAllAdmins,getAllClients}
