@@ -72,14 +72,105 @@ const createUser=async (req,res)=>{
         res.json({ message: "there is no tokens", status: "failed" })
     }
 }
-const deleteUser=(req,res)=>{
-    res.json({message:"helloDeleteUser"})
+const deleteUser=async (req,res)=>{
+    let _id = req.params.id;
+    console.log(_id);
+    let user = await userModel.findOne({_id});
+    if(user){
+        let token = req.header("auth")
+        console.log("token : ",token);
+        if (token) {
+            await jwt.verify(token, "admin", async (err, verifiedData) => {
+                if (err) {
+                    res.json({ message: "error in token" });
+                }
+                else {
+                    if (verifiedData) {
+                        await userModel.deleteOne({_id});
+                        user = await userModel.findOne({_id});
+                        if(!user){
+                            res.json({message:"user Deleted successfully"})
+                        }
+                        else{
+                            res.json({message:"error in deletion"})
+                        }
+                    }
+                }
+            }
+            )
+        }
+        else {
+            res.json({ message: "there is no tokens", status: "failed" })
+        }
+    }
+    else{
+        res.json({message:"invalid User ID"})
+    }
+
+}
+const updateUser = async(req,res)=>{
+    const { name, username, email, password,mobilePhone, clinicAddress } =req.body; 
+    const _id = req.params.id;
+    let user = await userModel.findOne({_id});
+    if(user){
+        let token = req.header("auth")
+        console.log("token : ",token);
+        if (token) {
+            await jwt.verify(token,user.type, async (err, verifiedData) => {
+                if (err) {
+                    res.json({ message: "error in token" });
+                }
+                else {
+                    if (verifiedData) {
+                        console.log(verifiedData.username);
+                        console.log(user.username);
+                        console.log(verifiedData.username===user.username);
+                        if(verifiedData.username==user.username){
+                            let testUser = await userModel.findOne({$or:[{username},{email},{mobilePhone}]});
+                            if(!testUser){
+                                const saltOrRounds = await bcrypt.genSalt(10);
+                                const hashedPassword = await bcrypt.hash(password, saltOrRounds);
+                                if(user.type==="doctor"){
+                                    let doctorInfo = await doctorInfoModel.findOne({doctorId:_id});
+                                    if(doctorInfo){
+                                        await doctorInfoModel.updateMany({doctorId:_id},{$set:{clinicAddress:clinicAddress||doctorInfo.clinicAddress}})
+                                    }
+                                    else{
+                                        res.json({message:"invalid doctor ID"})
+                                    }
+                                }
+                                await userModel.updateMany({_id},{$set:{
+                                    name:name||user.name, username:username||user.username,password:hashedPassword||user.password,
+                                    mobilePhone:mobilePhone||user.mobilePhone,imageUrl:req.file?`http://localhost:3000/${req.file.path}`:user.imageUrl}})
+                                user = await userModel.findOne({_id});
+                                res.json({message:"updated successfully",user})
+                            }
+                            else{
+
+                                res.json({message:"use another data",user})
+                            }
+                        }
+                        else{
+                            res.json({message:"unAuthorized"})
+                        }
+                    }
+                }
+            }
+            )
+        }
+        else {
+            res.json({ message: "there is no tokens", status: "failed" })
+        }
+    }
+    else{
+        res.json({message:"invalid User ID"})
+    }
 }
 
 const getAllUsers=async (req,res)=>{
     let users = await userModel.find({});
     if(users.length){
-        res.json(users);
+        res.json({users,numberOfUsers:users.length});
     }
     else{
         res.json({message:"there is no users"});
@@ -100,7 +191,7 @@ const getUserByid= async(req,res)=>{
 const getAllDoctors=async (req,res)=>{
     let doctors = await userModel.find({type:"doctor"});
     if(doctors.length){
-        res.json(doctors);
+        res.json({doctors,numberOfDoctors:doctors.length});
     }
     else{
         res.json({message:"there is no doctors"});
@@ -110,7 +201,7 @@ const getAllDoctors=async (req,res)=>{
 const getAllAdmins=async(req,res)=>{
     let admins = await userModel.find({type:"admin"});
     if(admins.length){
-        res.json(admins);
+        res.json({admins,numberOfAdmins:admins.length});
     }
     else{
         res.json({message:"there is no admins"});
@@ -121,7 +212,7 @@ const getAllAdmins=async(req,res)=>{
 const getAllClients=async(req,res)=>{
     let clients = await userModel.find({type:"patient"});
     if(clients.length){
-        res.json(clients);
+        res.json({clients,numberOfClients:clients.length});
     }
     else{
         res.json({message:"there is no clients"});
@@ -129,4 +220,4 @@ const getAllClients=async(req,res)=>{
     
 }
 
-module.exports={signup,createUser,getAllUsers,getUserByid,getAllDoctors,getAllAdmins,getAllClients}
+module.exports={signup,createUser,getAllUsers,getUserByid,getAllDoctors,getAllAdmins,getAllClients,deleteUser,updateUser}
