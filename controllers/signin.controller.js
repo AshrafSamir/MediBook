@@ -1,33 +1,17 @@
-const jwt = require("jsonwebtoken");
+const { json } = require("express");
 const userModel = require("../models/user.model");
-const bcrypt = require("bcrypt");
+
 const signin = async (req, res) => {
-  const { credential, password } = req.body;
-  let user = await userModel.findOne({
-    $or: [
-      { username: credential },
-      { email: credential },
-      { mobilePhone: credential },
-    ],
-  });
-  if (user) {
-    console.log(password, user.password);
-    const match = await bcrypt.compare(password, user.password);
-    if (match) {
-      let token = await jwt.sign(
-        { role: user.type, username: user.username, _id: user._id },
-        "thisisasecretformyapp"
-      );
-      res.setHeader("auth", token);
-      res.json({
-        message: "user signed in successfully",
-        user: { ...user._doc, token },
-      });
-    } else {
-      res.json({ message: "wrong password" });
-    }
-  } else {
-    res.json({ message: "wrong username or email or phone " });
+  try {
+    const { credential, password } = req.body;
+    let user = await userModel.findByCredentials(credential, password);
+    let token = await user.generateAuthToken(req, res);
+    res.json({
+      message: "user signed in successfully",
+      user: { ...user._doc, token },
+    });
+  } catch (error) {
+    res.status(400).json(error.message);
   }
 };
 module.exports = { signin };

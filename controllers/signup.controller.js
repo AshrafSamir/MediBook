@@ -3,6 +3,7 @@ const userModel = require("../models/user.model");
 const doctorInfoModel = require("../models/doctorInfo.model");
 const bcrypt = require("bcrypt");
 const { check, validationResult } = require("express-validator");
+const { userValidation } = require("../validation/userSchema");
 
 const signup = async (req, res) => {
   const {
@@ -16,39 +17,27 @@ const signup = async (req, res) => {
     clinicAddress,
     doctorSpecification,
   } = req.body;
-  const saltOrRounds = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, saltOrRounds);
-  req.body.password = hashedPassword;
-  console.log(req.body.password);
+
+  req.body.password = await userModel.hashPassword(password);
   let user = await userModel.findOne({
     $or: [{ username }, { email }, { mobilePhone }],
   });
-  console.log(user);
   if (user) {
     res.json({ message: "already logged" });
   } else {
-    await userModel.insertMany({
+    let user = await userModel.create({
       ...req.body,
       imageUrl: `http://localhost:3000/${req.file.path}`,
     });
-    user = await userModel.findOne({ username }, { password: 0 });
-    let token = await jwt.sign(
-      { role: user.type, username: user.username },
-      user.type
-    );
-    res.setHeader("auth", token);
-    console.log({ ...user }._doc);
+
+    let token = await user.generateAuthToken(req, res);
+
     if (user.type === "doctor") {
-      await doctorInfoModel.insertMany({
+      let doctorInfo = await doctorInfoModel.create({
         doctorId: user._id,
         clinicAddress,
         doctorSpecification,
       });
-      let doctorInfo = await doctorInfoModel.findOne(
-        { doctorId: user._id },
-        { _id: 0 }
-      );
-      console.log("doctor", doctorInfo);
       user.doctorInfo = doctorInfo;
       res.json({
         message: "User create succesfully",
@@ -128,66 +117,33 @@ const deleteUser = async (req, res) => {
   }
 };
 const updateUser = async (req, res) => {
-  const { name, username, email, password, mobilePhone, clinicAddress } =
-    req.body;
-  const _id = req.params.id;
-  let user = await userModel.findOne({ _id });
-  if (user) {
-    if (req.user) {
-      if (req.user.username == user.username) {
-        console.log("here");
-        let testUser = await userModel.findOne({
-          $or: [{ username }, { email }],
-        });
-        if (!testUser) {
-          const saltOrRounds = await bcrypt.genSalt(10);
-          const hashedPassword = await bcrypt.hash(
-            password || user.password,
-            saltOrRounds
-          );
-          if (user.type === "doctor") {
-            let doctorInfo = await doctorInfoModel.findOne({
-              doctorId: _id,
-            });
-            if (doctorInfo) {
-              await doctorInfoModel.updateMany(
-                { doctorId: _id },
-                {
-                  $set: {
-                    clinicAddress: clinicAddress || doctorInfo.clinicAddress,
-                  },
-                }
-              );
-            } else {
-              res.json({ message: "invalid doctor ID" });
-            }
-          }
-          await userModel.updateMany(
-            { _id },
-            {
-              $set: {
-                name: name || user.name,
-                username: username || user.username,
-                password: hashedPassword || user.password,
-                mobilePhone: mobilePhone || user.mobilePhone,
-                imageUrl: req.file
-                  ? `http://localhost:3000/${req.file.path}`
-                  : user.imageUrl,
-              },
-            }
-          );
-          user = await userModel.findOne({ _id });
-          res.json({ message: "updated successfully", user });
-        } else {
-          res.json({ message: "use another data", user });
-        }
-      } else {
-        res.json({ message: "unAuthorized" });
-      }
-    }
-  } else {
-    res.json({ message: "invalid User ID" });
+  const { error, value } = userValidation.validate(req.body);
+
+  if (error) {
+    console.log(error.details[0].message);
+    res.json({ message: error.details[0].message });
   }
+
+  if (req.user.type === "doctor") {
+    let { clinicAddress } = req.body;
+    await doctorInfoModel.updateMany(
+      { doctorId: req.user._id },
+      {
+        clinicAddress: clinicAddress || req.user.clinicAddress,
+      }
+    );
+  }
+  let _id = req.user._id;
+  await userModel.updateMany(
+    { _id },
+    {
+      ...req.body,
+      imageUrl: req.file
+        ? `http://localhost:3000/${req.file.path}`
+        : req.user.imageUrl,
+    }
+  );
+  res.json({ message: "updated successfully", user: req.user });
 };
 
 const getAllUsers = async (req, res) => {
