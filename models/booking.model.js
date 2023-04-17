@@ -13,7 +13,7 @@ const bookingSchema = mongoose.Schema({
     },
     ended:{
         type:Boolean,
-        default:false
+        default:true
     }
 
 });

@@ -9,11 +9,14 @@ const createBooking= async(req,res)=>{
     const {username} = req.body
     let timeSlot = await timeSlotsModel.findOne({$and:[{_id:timeSlotId},{isHoliday:false}]});
     let user = await userModel.findOne({username},{password:0,__v:0})
-    if(req.user.username===user.username){        
+    if(req.user.username===user.username){ 
         if(timeSlot){
             if(timeSlot.fullyBooked===false){
                 let booking = await bookingModel.create({patientId:user._id,timeSlotId});
                 await timeSlotsModel.updateMany({_id:timeSlotId},{$set:{reservations:++timeSlot.reservations}});
+                if(timeSlot.reservations>=timeSlot.maxReservations){
+                    await timeSlotsModel.updateMany({_id:timeSlotId},{$set:{fullyBooked:true}});
+                }
                 let doctor = await doctorInfoModel.findOne({doctorId:timeSlot.doctorId});
                 let reservation = {user,timeSlot,doctor,booking}
                 res.json({message:"session Booked successfully",reservation})

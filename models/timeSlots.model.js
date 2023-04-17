@@ -15,8 +15,6 @@ const timeSlotsSchema = mongoose.Schema({
       fullyBooked: { type: Boolean, default: false },
       isHoliday:{type:Boolean,default:false},
       bookingPrice:{type:Number,require:true}
-    
-  
 });
 
 module.exports = mongoose.model("timeslot", timeSlotsSchema);

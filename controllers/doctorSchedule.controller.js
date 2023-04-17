@@ -2,7 +2,7 @@ const doctorScheduleModel = require("../models/doctorSchedule.model");
 const timeSlotsModel = require("../models/timeSlots.model")
 const moment = require("moment");
 const createSchedule =  async (req, res) => {
-    const { holidays, fromDate, toDate, from, to, maxReservation, bookingPrice } = req.body;
+    const { holidays, fromDate, toDate, from, to, maxReservations, bookingPrice } = req.body;
     if (req.user.type === "doctor") {
       let schedule = [];
       let date = moment(fromDate);
@@ -25,7 +25,7 @@ const createSchedule =  async (req, res) => {
                 date: date.format("YYYY-MM-DD"),
                 from: moment(fromTime).add(2, "hours"),
                 to: moment(toTime).add(2, "hours"),
-                maxReservation,
+                maxReservations,
                 fullyBooked: false,
                 isHoliday:false,
                 bookingPrice
@@ -41,7 +41,7 @@ const createSchedule =  async (req, res) => {
                 date: date.format("YYYY-MM-DD"),
                 from: moment(fromTime).add(2, "hours"),
                 to: moment(toTime).add(2, "hours"),
-                maxReservation,
+                maxReservations,
                 fullyBooked: false,
                 isHoliday:true,
                 bookingPrice:0
