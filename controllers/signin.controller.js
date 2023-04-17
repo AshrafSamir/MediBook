@@ -11,6 +11,7 @@ const signin = async (req, res) => {
     ],
   });
   if (user) {
+    console.log(password, user.password);
     const match = await bcrypt.compare(password, user.password);
     if (match) {
       let token = await jwt.sign(

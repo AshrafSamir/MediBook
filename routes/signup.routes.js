@@ -1,4 +1,5 @@
 const signupRoute = require("express").Router();
+const auth = require("../middleware/auth");
 const {
   signup,
   createUser,
@@ -39,8 +40,13 @@ const userImage = multer({
   fileFilter,
 });
 signupRoute.post("/signup", userImage.single("profileImage"), signup);
-signupRoute.post("/createUser", userImage.single("profileImage"), createUser);
-signupRoute.delete("/deleteuser/:id", deleteUser);
+signupRoute.post(
+  "/createUser",
+  userImage.single("profileImage"),
+  auth,
+  createUser
+);
+signupRoute.delete("/deleteuser/:id", auth, deleteUser);
 signupRoute.patch(
   "/updateuser/:id",
   userImage.single("profileImage"),

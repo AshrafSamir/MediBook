@@ -74,84 +74,57 @@ const createUser = async (req, res) => {
     clinicAddress,
     doctorSpecification,
   } = req.body;
-  let token = req.header("auth");
-  console.log("token : ", token);
-  if (token) {
-    await jwt.verify(token, "admin", async (err, verifiedData) => {
-      if (err) {
-        res.json({ message: "error in token" });
-      } else {
-        if (verifiedData) {
-          console.log(verifiedData);
-          let user = await userModel.findOne({
-            $or: [{ username }, { email }, { mobilePhone }],
-          });
-          if (user) {
-            res.json({ message: "already logged" });
-          } else {
-            await userModel.insertMany({
-              ...req.body,
-              imageUrl: `http://localhost:3000/${req.file.path}`,
-            });
-            user = await userModel.findOne({ username }, { password: 0 });
-            if (user.type === "doctor") {
-              await doctorInfoModel.insertMany({
-                doctorId: user._id,
-                clinicAddress,
-                doctorSpecification,
-              });
-              let doctorInfo = await doctorInfoModel.findOne(
-                { doctorId: user._id },
-                { _id: 0 }
-              );
-              console.log("doctor", doctorInfo);
-              user.doctorInfo = doctorInfo;
-              res.json({
-                message: "User create succesfully",
-                user: { ...user._doc, ...doctorInfo._doc },
-              });
-            } else {
-              res.json({
-                message: "User create succesfully",
-                user: { ...user._doc },
-              });
-            }
-          }
-        }
-      }
+  if (req.user.type === "admin") {
+    let user = await userModel.findOne({
+      // validation not correct
+      $or: [{ username }, { email }],
     });
-  } else {
-    res.json({ message: "there is no tokens", status: "failed" });
+
+    if (user) {
+      res.json({ message: "already logged" });
+    } else {
+      await userModel.insertMany({
+        ...req.body,
+        imageUrl: `http://localhost:3000/${req.file.path}`,
+      });
+      user = await userModel.findOne({ username }, { password: 0 });
+      if (user.type === "doctor") {
+        await doctorInfoModel.insertMany({
+          doctorId: user._id,
+          clinicAddress,
+          doctorSpecification,
+        });
+        let doctorInfo = await doctorInfoModel.findOne(
+          { doctorId: user._id },
+          { _id: 0 }
+        );
+        console.log("doctor", doctorInfo);
+        user.doctorInfo = doctorInfo;
+        res.json({
+          message: "User create succesfully",
+          user: { ...user._doc, ...doctorInfo._doc },
+        });
+      } else {
+        res.json({
+          message: "User create succesfully",
+          user: { ...user._doc },
+        });
+      }
+    }
   }
 };
 const deleteUser = async (req, res) => {
   let _id = req.params.id;
-  console.log(_id);
   let user = await userModel.findOne({ _id });
-  if (user) {
-    let token = req.header("auth");
-    console.log("token : ", token);
-    if (token) {
-      await jwt.verify(token, "admin", async (err, verifiedData) => {
-        if (err) {
-          res.json({ message: "error in token" });
-        } else {
-          if (verifiedData) {
-            await userModel.deleteOne({ _id });
-            user = await userModel.findOne({ _id });
-            if (!user) {
-              res.json({ message: "user Deleted successfully" });
-            } else {
-              res.json({ message: "error in deletion" });
-            }
-          }
-        }
-      });
+  console.log(req.user);
+  if (req.user.type === "admin") {
+    await userModel.deleteOne({ _id });
+    user = await userModel.findOne({ _id });
+    if (!user) {
+      res.json({ message: "user Deleted successfully" });
     } else {
-      res.json({ message: "there is no tokens", status: "failed" });
+      res.json({ message: "error in deletion" });
     }
-  } else {
-    res.json({ message: "invalid User ID" });
   }
 };
 const updateUser = async (req, res) => {
