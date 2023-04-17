@@ -8,11 +8,16 @@ const doctorScheduleSchema = mongoose.Schema({
   },
   schedule: [
     {
-      date: { type: Date },
-      from: { type: Date },
-      to: { type: Date },
-      maxReservations: { type: Number },
-      fullyBooked: { type: Boolean, default: false },
+      // date: { type: Date },
+      // from: { type: Date },
+      // to: { type: Date },
+      // maxReservations: { type: Number },
+      // fullyBooked: { type: Boolean, default: false },
+      timeSlotId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "timeslot",
+        require: true,
+      }
     },
     ,
   ],
