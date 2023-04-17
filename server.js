@@ -6,6 +6,7 @@ const path = require("path");
 const signupRoute = require("./routes/signup.routes");
 const signinRoute = require("./routes/signin.routes");
 const doctorScheduleRoute = require("./routes/doctorSchedule.routes");
+const bookingRoute = require("./routes/booking.routes");
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(cors());
@@ -17,7 +18,7 @@ app.get("/", (req, res) => {
 app.use(signupRoute);
 app.use(signinRoute);
 app.use(doctorScheduleRoute);
-
+app.use(bookingRoute)
 mongoose.connect(process.env.MONGODB_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
