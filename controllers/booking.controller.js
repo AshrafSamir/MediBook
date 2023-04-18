@@ -33,6 +33,29 @@ const createBooking= async(req,res)=>{
         res.json({message:"unAuthorized"})
     }
 }
+const addBookingData= async(req,res)=>{
+    const bookingId= req.params.id;
+    let booking = await bookingModel.findOne({$and:[{_id:bookingId},{ended:false}]});
+    if(booking){
+        // console.log(booking.patientId.toString());
+        // console.log(req.user._id.toString());
+        if(req.user._id.toString()===booking.patientId.toString()){
+            if(req.file===undefined){
+                res.json({message:"unsupported file type"})
+            }
+            else{
+                let bookingAttachment = await bookingDataModel.create({bookingId,data:`http://localhost:3000/${req.file.path}`})
+                res.json({message:"attachment uploaded successfully",bookingAttachment});
+            }
+        }
+        else{
+            res.json({message:"unAuthorized"})
+        }
+    }
+    else{
+        res.json({message:"you can't add attachments with this booking"})
+    }
 
+}
 
-module.exports={createBooking}
+module.exports={createBooking, addBookingData}
