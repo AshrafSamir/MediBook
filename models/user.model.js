@@ -63,8 +63,9 @@ userSchema.statics.findByCredentials = async (credential, password) => {
     throw new Error("Can't find user");
   }
   console.log({ password });
+  console.log(user.password );
   const isMatch = await bcrypt.compare(password, user.password);
-
+  console.log(isMatch);
   if (!isMatch) {
     throw new Error("Wrong Password");
   }
@@ -72,15 +73,10 @@ userSchema.statics.findByCredentials = async (credential, password) => {
   return user;
 };
 
-userSchema.statics.hashPassword = async (password) => {
-  const salt = await bcrypt.genSalt(10);
-  return await bcrypt.hash(password, salt);
-};
-
 userSchema.pre("save", async function (next) {
   const user = this;
   if (user.isModified("password")) {
-    user.password = await bcrypt.hash(user.password, 8);
+    user.password = await bcrypt.hash(user.password, 10);
   }
 
   next();
@@ -90,7 +86,7 @@ userSchema.pre("updateMany", async function (next) {
   const user = this;
   let { password } = user._update;
   if (password) {
-    user._update.password = await bcrypt.hash(password, 8);
+    user._update.password = await bcrypt.hash(password, 10);
   }
 
   next();

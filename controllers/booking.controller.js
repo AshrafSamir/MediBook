@@ -33,6 +33,20 @@ const createBooking= async(req,res)=>{
         res.json({message:"unAuthorized"})
     }
 }
+const doctorTimeSlots= async(req,res)=>{
+    let doctorId = req.params.id;
+    try{
+        let timeSlots = await timeSlotsModel.find({doctorId});
+        if(timeSlots.length){
+            res.json({timeSlots});
+        }
+        else{
+            throw new Error("there is no timeSlots doc");
+        }
+    }
+    catch(err){
+        res.status(400).json(err.message);
+    }
+}
 
-
-module.exports={createBooking}
+module.exports={createBooking, doctorTimeSlots}

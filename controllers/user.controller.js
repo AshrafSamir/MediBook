@@ -8,6 +8,7 @@ const { userValidation } = require("../validation/userSchema");
 const signin = async (req, res) => {
   try {
     const { credential, password } = req.body;
+    console.log(req.body);
     let user = await userModel.findByCredentials(credential, password);
     let token = await user.generateAuthToken(req, res);
     res.json({
@@ -28,7 +29,6 @@ const signup = async (req, res) => {
     doctorSpecification,
   } = req.body;
 
-  req.body.password = await userModel.hashPassword(password);
   let user = await userModel.findOne({
     $or: [{ username }, { email }, { mobilePhone }],
   });
