@@ -1,5 +1,6 @@
 const doctorScheduleModel = require("../models/doctorSchedule.model");
 const timeSlotsModel = require("../models/timeSlots.model");
+const doctorInfo = require("../models/doctorInfo.model");
 const moment = require("moment");
 const createSchedule = async (req, res) => {
   const {
@@ -78,20 +79,29 @@ const createSchedule = async (req, res) => {
     res.json({ message: "unAuthorized" });
   }
 };
-const doctorTimeSlots = async(req,res)=>{
-  const doctorId=req.params.id;
-  try{
-    let timeSlots = await timeSlotsModel.find({doctorId});
-    if(timeSlots.length){
-      res.json(timeSlots)
+const doctorTimeSlots = async (req, res) => {
+  const doctorId = req.params.id;
+  try {
+    let timeSlots = await timeSlotsModel.find({ doctorId });
+    if (timeSlots.length) {
+      res.json(timeSlots);
+    } else {
+      throw new Error("this doctor has no timeSlots");
     }
-    else{
-      throw new Error ("this doctor has no timeSlots")
+  } catch (err) {
+    res.status(400).json(err.message);
+  }
+};
+const getDoctorsInfo = async (req, res) => {
+  try {
+    let result = await doctorInfo.find({});
+    if (result.length) {
+      res.json(result);
+    } else {
+      throw new Error("there is no doctors info");
     }
+  } catch (err) {
+    res.status(400).json(err.message);
   }
-  catch (err){
-    res.status(400).json(err.message)
-  }
-
-}
-module.exports = { createSchedule,doctorTimeSlots };
+};
+module.exports = { createSchedule, doctorTimeSlots, getDoctorsInfo };

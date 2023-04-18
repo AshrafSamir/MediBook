@@ -180,6 +180,7 @@ const getAllDoctors = async (req, res) => {
     let doctorInfo = await doctorInfoModel.findOne({
       doctorId: doctors[i]._id,
     });
+    console.log(doctors[i]._id);
     allDoctorsData.push({ ...doctors[i]._doc, ...doctorInfo._doc });
   }
   if (doctors.length) {
