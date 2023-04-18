@@ -6,10 +6,8 @@ const doctorInfoSchema = mongoose.Schema({
     ref: "user",
     require: true,
   },
-  doctorSpecification: {
-    specification: { type: String },
-    role: { type: String, default: "human", enum: ["human", "veterinary"] },
-  },
+  specification: { type: String },
+  role: { type: String, default: "human", enum: ["human", "veterinary"] },
   clinicAddress: { type: String, require: true },
   availability: { type: Boolean, default: true },
 });

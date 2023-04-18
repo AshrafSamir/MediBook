@@ -27,7 +27,8 @@ const signup = async (req, res) => {
     imageUrl,
     mobilePhone,
     clinicAddress,
-    doctorSpecification,
+    specification,
+    role,
   } = req.body;
 
   let user = await userModel.findOne({
@@ -53,7 +54,8 @@ const signup = async (req, res) => {
       let doctorInfo = await doctorInfoModel.create({
         doctorId: user._id,
         clinicAddress,
-        doctorSpecification,
+        specification,
+        role,
       });
       user.doctorInfo = doctorInfo;
       res.json({
@@ -70,7 +72,7 @@ const signup = async (req, res) => {
 };
 
 const createUser = async (req, res) => {
-  const { username, email, mobilePhone, clinicAddress, doctorSpecification } =
+  const { username, email, mobilePhone, clinicAddress, specification, role } =
     req.body;
   if (req.user.type === "admin") {
     let user = await userModel.findOne({
@@ -87,7 +89,8 @@ const createUser = async (req, res) => {
         let doctorInfo = await doctorInfoModel.create({
           doctorId: user._id,
           clinicAddress,
-          doctorSpecification,
+          specification,
+          role,
         });
         user.doctorInfo = doctorInfo;
         res.json({
@@ -121,15 +124,17 @@ const updateUser = async (req, res) => {
   const { error, value } = userValidation.validate(req.body);
 
   if (error) {
-    console.log(error.details[0].message);
     res.json({ message: error.details[0].message });
   }
   if (req.user.type === "doctor") {
-    let { clinicAddress } = req.body;
+    let { clinicAddress, specification, role } = req.body;
+    // needs input validation with joi
     await doctorInfoModel.updateMany(
       { doctorId: req.user._id },
       {
-        clinicAddress: clinicAddress || req.user.clinicAddress,
+        clinicAddress,
+        specification,
+        role,
       }
     );
   }
