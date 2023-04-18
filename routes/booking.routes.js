@@ -1,6 +1,12 @@
 const bookingRoute = require("express").Router();
 const auth = require("../middleware/auth");
-const { createBooking, addBookingData } = require("../controllers/booking.controller");
+const { createBooking,
+        addBookingData, 
+        getAllBookings,
+        getBookingById,
+        getBookingData,
+        getBookingbyPatientId,
+} = require("../controllers/booking.controller");
 const multer = require("multer");
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -33,5 +39,7 @@ const bookingAttachments = multer({
 });
 bookingRoute.post("/book/:id", auth, createBooking);
 bookingRoute.post("/addbookingdata/:id", auth, bookingAttachments.single("bookingAttachment"), addBookingData);
-
+bookingRoute.get("/allbookings",getAllBookings)
+bookingRoute.get("/booking/:id",getBookingById)
+bookingRoute.get("/bookingdata/:id",getBookingData)
 module.exports = bookingRoute;
