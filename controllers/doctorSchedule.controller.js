@@ -22,9 +22,11 @@ const createSchedule = async (req, res) => {
     let endDate = moment(toDate);
     let isValid = true;
     if (moment(date).isBefore(endDate) && moment(fromTime).isBefore(toTime)) {
-      for (let i = 0; i < holidays.length; i++) {
-        isValid = moment(holidays[i]).isBetween(date, endDate);
-        if (!isValid) break;
+      if(holidays.length){
+        for (let i = 0; i < holidays.length; i++) {
+          isValid = moment(holidays[i]).isBetween(date, endDate);
+          if (!isValid) break;
+        }
       }
       if (isValid) {
         while (date <= endDate) {
