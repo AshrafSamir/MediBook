@@ -5,14 +5,24 @@ const bcrypt = require("bcrypt");
 const { check, validationResult } = require("express-validator");
 const { userValidation } = require("../validation/userSchema");
 
+const signin = async (req, res) => {
+  try {
+    const { credential, password } = req.body;
+    let user = await userModel.findByCredentials(credential, password);
+    let token = await user.generateAuthToken(req, res);
+    res.json({
+      message: "user signed in successfully",
+      user: { ...user._doc, token },
+    });
+  } catch (error) {
+    res.status(400).json(error.message);
+  }
+};
 const signup = async (req, res) => {
   const {
-    name,
     username,
     email,
     password,
-    gender,
-    type,
     mobilePhone,
     clinicAddress,
     doctorSpecification,
@@ -52,42 +62,25 @@ const signup = async (req, res) => {
   }
 };
 const createUser = async (req, res) => {
-  const {
-    name,
-    username,
-    email,
-    password,
-    gender,
-    type,
-    mobilePhone,
-    clinicAddress,
-    doctorSpecification,
-  } = req.body;
+  const { username, email, mobilePhone, clinicAddress, doctorSpecification } =
+    req.body;
   if (req.user.type === "admin") {
     let user = await userModel.findOne({
-      // validation not correct
-      $or: [{ username }, { email }],
+      $or: [{ username }, { email }, { mobilePhone }],
     });
-
     if (user) {
-      res.json({ message: "already logged" });
+      res.json({ message: "User already exist" });
     } else {
-      await userModel.insertMany({
+      let user = await userModel.create({
         ...req.body,
         imageUrl: `http://localhost:3000/${req.file.path}`,
       });
-      user = await userModel.findOne({ username }, { password: 0 });
       if (user.type === "doctor") {
-        await doctorInfoModel.insertMany({
+        let doctorInfo = await doctorInfoModel.create({
           doctorId: user._id,
           clinicAddress,
           doctorSpecification,
         });
-        let doctorInfo = await doctorInfoModel.findOne(
-          { doctorId: user._id },
-          { _id: 0 }
-        );
-        console.log("doctor", doctorInfo);
         user.doctorInfo = doctorInfo;
         res.json({
           message: "User create succesfully",
@@ -104,8 +97,6 @@ const createUser = async (req, res) => {
 };
 const deleteUser = async (req, res) => {
   let _id = req.params.id;
-  let user = await userModel.findOne({ _id });
-  console.log(req.user);
   if (req.user.type === "admin") {
     await userModel.deleteOne({ _id });
     user = await userModel.findOne({ _id });
@@ -123,7 +114,6 @@ const updateUser = async (req, res) => {
     console.log(error.details[0].message);
     res.json({ message: error.details[0].message });
   }
-
   if (req.user.type === "doctor") {
     let { clinicAddress } = req.body;
     await doctorInfoModel.updateMany(
@@ -143,7 +133,10 @@ const updateUser = async (req, res) => {
         : req.user.imageUrl,
     }
   );
-  res.json({ message: "updated successfully", user: req.user });
+  let updatedUser = await userModel.find({
+    _id: req.user._id,
+  });
+  res.json({ message: "updated successfully", user: updatedUser });
 };
 
 const getAllUsers = async (req, res) => {
@@ -193,6 +186,7 @@ const getAllClients = async (req, res) => {
 };
 
 module.exports = {
+  signin,
   signup,
   createUser,
   getAllUsers,

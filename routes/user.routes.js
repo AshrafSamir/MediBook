@@ -1,6 +1,7 @@
-const signupRoute = require("express").Router();
+const userRoute = require("express").Router();
 const auth = require("../middleware/auth");
 const {
+  signin,
   signup,
   createUser,
   getAllUsers,
@@ -10,7 +11,7 @@ const {
   getAllClients,
   deleteUser,
   updateUser,
-} = require("../controllers/signup.controller");
+} = require("../controllers/user.controller");
 const multer = require("multer");
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -39,24 +40,25 @@ const userImage = multer({
   storage,
   fileFilter,
 });
-signupRoute.post("/signup", userImage.single("profileImage"), signup);
-signupRoute.post(
+userRoute.post("/signin", signin);
+userRoute.post("/signup", userImage.single("profileImage"), signup);
+userRoute.post(
   "/createUser",
   userImage.single("profileImage"),
   auth,
   createUser
 );
-signupRoute.delete("/deleteuser/:id", auth, deleteUser);
-signupRoute.patch(
+userRoute.delete("/deleteuser/:id", auth, deleteUser);
+userRoute.patch(
   "/updateuser/:id",
   userImage.single("profileImage"),
   auth,
   updateUser
 );
-signupRoute.get("/allusers", getAllUsers);
-signupRoute.get("/user/:id", getUserByid);
-signupRoute.get("/alldoctors", getAllDoctors);
-signupRoute.get("/alladmins", getAllAdmins);
-signupRoute.get("/allclients", getAllClients);
+userRoute.get("/allusers", getAllUsers);
+userRoute.get("/user/:id", getUserByid);
+userRoute.get("/alldoctors", getAllDoctors);
+userRoute.get("/alladmins", getAllAdmins);
+userRoute.get("/allclients", getAllClients);
 
-module.exports = signupRoute;
+module.exports = userRoute;
