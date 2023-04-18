@@ -50,6 +50,7 @@ signupRoute.delete("/deleteuser/:id", auth, deleteUser);
 signupRoute.patch(
   "/updateuser/:id",
   userImage.single("profileImage"),
+  auth,
   updateUser
 );
 signupRoute.get("/allusers", getAllUsers);

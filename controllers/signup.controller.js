@@ -133,72 +133,57 @@ const updateUser = async (req, res) => {
   const _id = req.params.id;
   let user = await userModel.findOne({ _id });
   if (user) {
-    let token = req.header("auth");
-    console.log("token : ", token);
-    if (token) {
-      await jwt.verify(token, user.type, async (err, verifiedData) => {
-        if (err) {
-          res.json({ message: "error in token" });
-        } else {
-          if (verifiedData) {
-            console.log(verifiedData.username);
-            console.log(user.username);
-            console.log(verifiedData.username === user.username);
-            if (verifiedData.username == user.username) {
-              let testUser = await userModel.findOne({
-                $or: [{ username }, { email }, { mobilePhone }],
-              });
-              if (!testUser) {
-                const saltOrRounds = await bcrypt.genSalt(10);
-                const hashedPassword = await bcrypt.hash(
-                  password,
-                  saltOrRounds
-                );
-                if (user.type === "doctor") {
-                  let doctorInfo = await doctorInfoModel.findOne({
-                    doctorId: _id,
-                  });
-                  if (doctorInfo) {
-                    await doctorInfoModel.updateMany(
-                      { doctorId: _id },
-                      {
-                        $set: {
-                          clinicAddress:
-                            clinicAddress || doctorInfo.clinicAddress,
-                        },
-                      }
-                    );
-                  } else {
-                    res.json({ message: "invalid doctor ID" });
-                  }
+    if (req.user) {
+      if (req.user.username == user.username) {
+        console.log("here");
+        let testUser = await userModel.findOne({
+          $or: [{ username }, { email }],
+        });
+        if (!testUser) {
+          const saltOrRounds = await bcrypt.genSalt(10);
+          const hashedPassword = await bcrypt.hash(
+            password || user.password,
+            saltOrRounds
+          );
+          if (user.type === "doctor") {
+            let doctorInfo = await doctorInfoModel.findOne({
+              doctorId: _id,
+            });
+            if (doctorInfo) {
+              await doctorInfoModel.updateMany(
+                { doctorId: _id },
+                {
+                  $set: {
+                    clinicAddress: clinicAddress || doctorInfo.clinicAddress,
+                  },
                 }
-                await userModel.updateMany(
-                  { _id },
-                  {
-                    $set: {
-                      name: name || user.name,
-                      username: username || user.username,
-                      password: hashedPassword || user.password,
-                      mobilePhone: mobilePhone || user.mobilePhone,
-                      imageUrl: req.file
-                        ? `http://localhost:3000/${req.file.path}`
-                        : user.imageUrl,
-                    },
-                  }
-                );
-                user = await userModel.findOne({ _id });
-                res.json({ message: "updated successfully", user });
-              } else {
-                res.json({ message: "use another data", user });
-              }
+              );
             } else {
-              res.json({ message: "unAuthorized" });
+              res.json({ message: "invalid doctor ID" });
             }
           }
+          await userModel.updateMany(
+            { _id },
+            {
+              $set: {
+                name: name || user.name,
+                username: username || user.username,
+                password: hashedPassword || user.password,
+                mobilePhone: mobilePhone || user.mobilePhone,
+                imageUrl: req.file
+                  ? `http://localhost:3000/${req.file.path}`
+                  : user.imageUrl,
+              },
+            }
+          );
+          user = await userModel.findOne({ _id });
+          res.json({ message: "updated successfully", user });
+        } else {
+          res.json({ message: "use another data", user });
         }
-      });
-    } else {
-      res.json({ message: "there is no tokens", status: "failed" });
+      } else {
+        res.json({ message: "unAuthorized" });
+      }
     }
   } else {
     res.json({ message: "invalid User ID" });
