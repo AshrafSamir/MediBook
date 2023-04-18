@@ -24,7 +24,7 @@ const signup = async (req, res) => {
   const {
     username,
     email,
-    password,
+    imageUrl,
     mobilePhone,
     clinicAddress,
     doctorSpecification,
@@ -36,10 +36,16 @@ const signup = async (req, res) => {
   if (user) {
     res.json({ message: "already logged" });
   } else {
-    let user = await userModel.create({
-      ...req.body,
-      imageUrl: `http://localhost:3000/${req.file.path}`,
-    });
+    if (imageUrl) {
+      user = await userModel.create({
+        ...req.body,
+        imageUrl: `http://localhost:3000/${req.file.path}`,
+      });
+    } else {
+      user = await userModel.create({
+        ...req.body,
+      });
+    }
 
     let token = await user.generateAuthToken(req, res);
 
