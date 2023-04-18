@@ -18,6 +18,7 @@ const signin = async (req, res) => {
     res.status(400).json(error.message);
   }
 };
+
 const signup = async (req, res) => {
   const {
     username,
@@ -61,6 +62,7 @@ const signup = async (req, res) => {
     }
   }
 };
+
 const createUser = async (req, res) => {
   const { username, email, mobilePhone, clinicAddress, doctorSpecification } =
     req.body;
@@ -95,6 +97,7 @@ const createUser = async (req, res) => {
     }
   }
 };
+
 const deleteUser = async (req, res) => {
   let _id = req.params.id;
   if (req.user.type === "admin") {
@@ -107,6 +110,7 @@ const deleteUser = async (req, res) => {
     }
   }
 };
+
 const updateUser = async (req, res) => {
   const { error, value } = userValidation.validate(req.body);
 
@@ -160,8 +164,15 @@ const getUserByid = async (req, res) => {
 
 const getAllDoctors = async (req, res) => {
   let doctors = await userModel.find({ type: "doctor" });
+  let allDoctorsData = [];
+  for (let i = 0; i < doctors.length; i++) {
+    let doctorInfo = await doctorInfoModel.findOne({
+      doctorId: doctors[i]._id,
+    });
+    allDoctorsData.push({ ...doctors[i]._doc, ...doctorInfo._doc });
+  }
   if (doctors.length) {
-    res.json({ doctors, numberOfDoctors: doctors.length });
+    res.json({ allDoctorsData, numberOfDoctors: doctors.length });
   } else {
     res.json({ message: "there is no doctors" });
   }
