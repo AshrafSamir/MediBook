@@ -72,7 +72,7 @@ const signup = async (req, res) => {
 };
 
 const createUser = async (req, res) => {
-  const { username, email, mobilePhone, clinicAddress, specification, role } =
+  const { username, email, mobilePhone, clinicAddress, specification, role,type } =
     req.body;
   if (req.user.type === "admin") {
     let user = await userModel.findOne({
@@ -208,6 +208,41 @@ const getAllClients = async (req, res) => {
   }
 };
 
+/**
+ * [ ]
+ */
+
+const searchDoctors = async (req, res) => {
+  
+  const {name, specification, clinicAddress}= req.query
+  let doctorInfoKeys = {}
+  let doctorUserKeys={}
+  name?doctorUserKeys.name=name:null;
+  console.log("doctorUserKeys",doctorUserKeys);
+  let doctors = await userModel.find({$and:[{type: "doctor"},{...doctorUserKeys}]});
+  console.log("doctors",doctors);
+  let allDoctorsData = [];
+  specification?doctorInfoKeys.specification=specification:null;
+  clinicAddress?doctorInfoKeys.clinicAddress=clinicAddress:null;
+  console.log("doctorInfoKeys",{...doctorInfoKeys});
+  for (let i = 0; i < doctors.length; i++) {
+    let doctorInfo = await doctorInfoModel.findOne({
+      doctorId: doctors[i]._id,...doctorInfoKeys
+    });
+    // console.log(doctors[i]._id);
+    console.log(doctorInfo);
+    if(doctorInfo){
+      allDoctorsData.push({ ...doctors[i]._doc, ...doctorInfo._doc });
+    }
+  }
+  if (doctors.length) {
+    res.json({ allDoctorsData, numberOfDoctors: doctors.length });
+  } else {
+    res.json({ message: "there is no doctors" });
+  }
+};
+
+
 module.exports = {
   signin,
   signup,
@@ -219,4 +254,5 @@ module.exports = {
   getAllClients,
   deleteUser,
   updateUser,
+  searchDoctors
 };
