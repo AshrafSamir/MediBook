@@ -38,10 +38,18 @@ const addRate= async(req,res)=>{
         res.json({ message: "unAuthorized" });
     }
 }
-
+const mostRated = async(req,res)=>{
+    let doctors = await doctorInfoModel.find({}).sort({doctorRate:-1});
+    if(doctors){
+        res.json({doctors});
+    }
+    else{
+        res.json({message:"there is no doctors"});
+    }
+}
 
 module.exports = {
     addRate,
-
+    mostRated
 };
 
