@@ -173,6 +173,20 @@ const getUserByid = async (req, res) => {
   }
 };
 
+const getDoctorById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    let doctor = await userModel.findOne({ _id: id, type: "doctor" });
+    let doctorInfo = await doctorInfoModel.findOne({ doctorId: id });
+    if (!doctor) {
+      res.json({ message: "invalid doctor ID" });
+    }
+    res.json({ ...doctor._doc, ...doctorInfo._doc });
+  } catch (error) {
+    res.status(400).json(error.message);
+  }
+};
+
 const getAllDoctors = async (req, res) => {
   let doctors = await userModel.find({ type: "doctor" });
   let allDoctorsData = [];
@@ -219,4 +233,5 @@ module.exports = {
   getAllClients,
   deleteUser,
   updateUser,
+  getDoctorById,
 };

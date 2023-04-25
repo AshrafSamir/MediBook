@@ -11,6 +11,7 @@ const {
   getAllClients,
   deleteUser,
   updateUser,
+  getDoctorById,
 } = require("../controllers/user.controller");
 const multer = require("multer");
 var storage = multer.diskStorage({
@@ -55,10 +56,11 @@ userRoute.patch(
   auth,
   updateUser
 );
-userRoute.get("/allusers", getAllUsers);
-userRoute.get("/user/:id", getUserByid);
-userRoute.get("/alldoctors", getAllDoctors);
-userRoute.get("/alladmins", getAllAdmins);
-userRoute.get("/allclients", getAllClients);
+userRoute.get("/allusers", auth, getAllUsers);
+userRoute.get("/user/:id", auth, getUserByid);
+userRoute.get("/alldoctors", auth, getAllDoctors);
+userRoute.get("/alladmins", auth, getAllAdmins);
+userRoute.get("/allclients", auth, getAllClients);
+userRoute.get("/getdoctor/:id", auth, getDoctorById);
 
 module.exports = userRoute;
