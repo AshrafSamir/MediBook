@@ -3,6 +3,6 @@ const auth = require("../middleware/auth");
 
 const { getTimeSlot } = require("../controllers/timeSlots.controller");
 
-timeSlotRoute.get("/getTimeSlot/:id", auth, getTimeSlot);
+timeSlotRoute.get("/getTimeSlot/:id", getTimeSlot);
 
 module.exports = timeSlotRoute;
