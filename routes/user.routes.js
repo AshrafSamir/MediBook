@@ -14,6 +14,7 @@ const {
   searchDoctors,
 } = require("../controllers/user.controller");
 const multer = require("multer");
+const { getDoctorIncomes } = require("../controllers/doctorSchedule.controller");
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads/profileImages");
@@ -62,5 +63,6 @@ userRoute.get("/alldoctors", getAllDoctors);
 userRoute.get("/alladmins", getAllAdmins);
 userRoute.get("/allclients", getAllClients);
 userRoute.get("/searchDoctors", searchDoctors);
+userRoute.get("/getdoctorincomes/:id", getDoctorIncomes);
 
 module.exports = userRoute;
