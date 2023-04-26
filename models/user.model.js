@@ -58,7 +58,6 @@ userSchema.statics.findByCredentials = async (credential, password) => {
       { mobilePhone: credential },
     ],
   });
-
   if (!user) {
     throw new Error("Can't find user");
   }

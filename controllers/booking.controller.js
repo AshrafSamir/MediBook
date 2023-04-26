@@ -29,10 +29,12 @@ const createBooking = async (req, res) => {
             { $set: { fullyBooked: true } }
           );
         }
-        let doctor = await doctorInfoModel.findOne({
+        let doctorUser = await userModel.findOne({_id:timeSlot.doctorId},{password:0, __v:0});
+        let doctorInfo = await doctorInfoModel.findOne({
           doctorId: timeSlot.doctorId,
         });
-        let reservation = { user, timeSlot, doctor, booking };
+        let doctor = {...doctorUser._doc,...doctorInfo._doc}
+        let reservation = { user, timeSlot, doctor, booking:{...booking._doc,fees:timeSlot.bookingPrice} };
         res.json({ message: "session Booked successfully", reservation });
       } else {
         res.json({ message: "this session is fully booked" });
@@ -165,6 +167,39 @@ const getBookingData = async (req, res) => {
     }
 }
 }
+const getUserBookings = async(req,res)=>{
+  let userId = req.params.id;
+  let user = await userModel.findOne({_id:userId});
+  let userBookings = [];
+  if(user){
+    let bookings = await bookingModel.find({patientId:user._id});
+    if(bookings.length){
+      for (let i = 0; i < bookings.length; i++) {
+          let timeSlot = await timeSlotsModel.findOne({_id:bookings[i].timeSlotId});
+          let doctorUser = await userModel.findOne({_id:timeSlot.doctorId});
+          let doctorInfo = await doctorInfoModel.findOne({doctorId:doctorUser._id});
+          let reservation = { user,
+             timeSlot,
+             doctor :{...doctorUser._doc,...doctorInfo._doc},
+             booking:{...bookings[i]._doc,fees:timeSlot.bookingPrice} 
+            };
+          userBookings.push(reservation)
+      }
+      if(userBookings.length){
+        res.json({userBookings});
+      }
+      else{
+        res.json({message:"this user has no bookings"})
+      }
+    }
+    else{
+      res.json({message:"this user has no bookings"})
+    }
+  }
+  else{
+    res.json({message:"invalid user ID"})
+  }
+}
 
 module.exports = {
   createBooking,
@@ -172,5 +207,6 @@ module.exports = {
   getAllBookings,
   getBookingById,
   getBookingData,
+  getUserBookings
 };
 

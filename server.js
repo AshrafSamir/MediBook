@@ -20,7 +20,7 @@ app.use(userRoute);
 app.use(doctorScheduleRoute);
 app.use(bookingRoute);
 app.use(rateRoute)
-
+//mongodb://127.0.0.1:27017/gpiti
 mongoose.connect(process.env.MONGODB_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
