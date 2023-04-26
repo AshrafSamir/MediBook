@@ -170,10 +170,42 @@ const getDoctorIncomes = async (req,res)=>{
       res.json({message:"invalid doctor or time slot id"})
     }
   }
+  const getDoctorBookings = async(req,res)=>{
+    let _id = await req.params.id;
+    let doctor = await userModel.findOne({_id});
+    let doctorBookings = [];
+    if(doctor){
+      let timeSlots= await timeSlotsModel.find({doctorId:doctor._id});
+      if(timeSlots.length){
+        for (let i = 0; i < timeSlots.length; i++) {
+          let bookings = await bookingModel.find({timeSlotId:timeSlots[i]._id});
+          if(bookings.length){
+            for (let j = 0; j < bookings.length; j++) {
+              let patient = await userModel.findOne({_id:bookings[i].patientId})
+              doctorBookings.push({timeSlot:timeSlots[i],patient,booking:bookings[i]});              
+            }
+          }          
+        }
+        if(doctorBookings.length){
+          res.json({doctorBookings,numberOfBookings:doctorBookings.length})
+        }
+        else{
+          res.json({message:"there is no bookings for any timeSlot"})
+        }
+      }
+      else{
+        res.json({message:"this doctor has no timeSlots"})
+      }
+    }
+    else{
+      res.json({message:"invalid user ID"})
+    }
+  }
 module.exports = { 
     createSchedule,
     doctorTimeSlots,
     getDoctorsInfo,
     getDoctorIncomes,
-    getTimeSlotBookings
+    getTimeSlotBookings,
+    getDoctorBookings
    };
