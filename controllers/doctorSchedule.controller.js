@@ -4,6 +4,7 @@ const doctorInfo = require("../models/doctorInfo.model");
 let userModel = require("../models/user.model")
 const moment = require("moment");
 const bookingModel = require("../models/booking.model");
+const doctorInfoModel = require("../models/doctorInfo.model");
 const createSchedule = async (req, res) => {
   const {
     holidays,
@@ -96,6 +97,24 @@ const doctorTimeSlots = async (req, res) => {
     res.status(400).json(err.message);
   }
 };
+const timeSlotById = async(req,res)=>{
+  try{
+    let _id = req.params.id;
+    let timeSlot = await timeSlotsModel.findOne({_id});
+    if(timeSlot){
+      let doctorUser = await userModel.findOne({_id:timeSlot.doctorId});
+      let doctorInfo = await doctorInfoModel.findOne({doctorId:timeSlot.doctorId});
+      let doctor = { ...doctorUser._doc,...doctorInfo._doc};
+      res.json({...timeSlot._doc,...doctor});
+    }
+    else{
+      throw new Error( "invalid timeSlot ID");
+    }
+  }
+  catch(err){
+    res.status(400).json(err.message);
+  }
+}
 const getDoctorsInfo = async (req, res) => {
   try {
     let result = await doctorInfo.find({});
@@ -207,5 +226,6 @@ module.exports = {
     getDoctorsInfo,
     getDoctorIncomes,
     getTimeSlotBookings,
-    getDoctorBookings
+    getDoctorBookings,
+    timeSlotById
    };

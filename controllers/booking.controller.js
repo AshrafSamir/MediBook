@@ -125,6 +125,8 @@ const getBookingById = async (req, res) => {
       { password: 0, _v: 0 }
     );
     booking = {
+      ...bookingTemp._doc,
+      fees:timeSlot.bookingPrice,
       user,
       timeSlot,
       doctor: { ...doctor._doc, ...doctorInfo._doc },
