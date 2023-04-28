@@ -39,12 +39,22 @@ const addRate= async(req,res)=>{
     }
 }
 const mostRated = async(req,res)=>{
-    let doctors = await doctorInfoModel.find({}).sort({doctorRate:-1});
-    if(doctors){
-        res.json({doctors});
+    try{        
+        let doctorsInfo  = await doctorInfoModel.find({}).sort({doctorRate:-1});
+        let doctors=[];
+        if(doctorsInfo ){
+            for (let i = 0; i < doctorsInfo.length; i++) {
+                let doctorUser = await userModel.findOne({_id:doctorsInfo[i].doctorId});     
+                doctors.push({...doctorUser._doc,...doctorsInfo[i]._doc});       
+            }
+            res.json({doctors});
+        }
+        else{
+            throw new Error( "there is no doctors");
+        }
     }
-    else{
-        res.json({message:"there is no doctors"});
+    catch(err){
+        res.status(400).json(err.message);
     }
 }
 

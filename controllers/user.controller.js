@@ -37,7 +37,7 @@ const signup = async (req, res) => {
   if (user) {
     res.json({ message: "already logged" });
   } else {
-    if (imageUrl) {
+    if (req.file) {
       user = await userModel.create({
         ...req.body,
         imageUrl: `http://localhost:3000/${req.file.path}`,
@@ -241,8 +241,23 @@ const searchDoctors = async (req, res) => {
     res.json({ message: "there is no doctors" });
   }
 };
-
-
+const userCounts = async(req,res)=>{
+  let users = await userModel.count({});
+  let admins = await userModel.count({type:"admin"});
+  let patients = await userModel.count({type:"patient"});
+  let doctors = await userModel.count({type:"doctor"});
+  try{
+    if(users){
+      res.json({numberOfUsers:users,numberOfAdmins:admins,numberOfDoctors:doctors,numberOfClients:patients})
+    }
+    else{
+      throw new Error( "no users");
+    }
+  }
+  catch(err){
+    res.status(400).json(err.message);
+  }
+}
 module.exports = {
   signin,
   signup,
@@ -254,5 +269,6 @@ module.exports = {
   getAllClients,
   deleteUser,
   updateUser,
-  searchDoctors
+  searchDoctors,
+  userCounts
 };

@@ -12,6 +12,7 @@ const {
   deleteUser,
   updateUser,
   searchDoctors,
+  userCounts,
 } = require("../controllers/user.controller");
 const multer = require("multer");
 const { getDoctorIncomes, getDoctorBookings } = require("../controllers/doctorSchedule.controller");
@@ -65,5 +66,6 @@ userRoute.get("/allclients", getAllClients);
 userRoute.get("/searchDoctors", searchDoctors);
 userRoute.get("/getdoctorincomes/:id", getDoctorIncomes);
 userRoute.get("/getdoctorbookings/:id", getDoctorBookings);
+userRoute.get("/usercount", userCounts);
 
 module.exports = userRoute;
