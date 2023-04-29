@@ -220,6 +220,66 @@ const getDoctorIncomes = async (req,res)=>{
       res.json({message:"invalid user ID"})
     }
   }
+  const userDoctorFrequency = async(req,res)=>{
+    const _id = req.params.id;
+    let userFrequency=[];
+    try{
+      let user = await userModel.findOne({_id});
+      if(user){
+        let userBookings = await bookingModel.find({patientId:user._id});
+        for (let i = 0; i < userBookings.length; i++) {
+          let doctorId= userBookings[i].doctorId;
+          let frequency = await bookingModel.count({patientId:user._id,doctorId})
+          if(frequency){
+            userFrequency.push({name:user.username,value:frequency});
+          }
+        }
+        if(userFrequency.length){
+          res.json({userFrequency})
+        }
+        else{
+          throw new Error("this user has no bookings")
+        }
+      }
+      else{
+        throw new Error("invalid User ID")
+      }
+    }
+    catch(err){
+      res.status(400).json(err.message);
+    }
+  }
+  const userDepartmentFrequency=async(req,res)=>{
+    let _id = req.params.id;
+    try{
+      let user = await userModel.findOne({_id});
+      let bookings = [];
+      let userDeptFrequency =[];
+      if(user){
+        let userBookings = await bookingModel.find({patientId:user._id},{_id:0});;
+        for (let i = 0; i < userBookings.length; i++) {
+          let doctorInfo= await doctorInfoModel.findOne({doctorId:userBookings[i].doctorId});
+          let departmentName = doctorInfo.specification;
+          let frequency = await bookingModel.count({patientId:user._id,departmentName});
+          if(frequency){
+            userDeptFrequency.push({name:user.username,value:frequency});
+          }
+        }
+        if(userDeptFrequency.length){
+          res.json(userDeptFrequency)
+        }
+        else{
+          throw new Error("this user has no bookings")
+        }
+      }
+      else{
+        throw new Error("invalid User ID")
+      }
+    }
+    catch(err){
+      res.status(400).json(err.message);
+    }
+  }
 module.exports = { 
     createSchedule,
     doctorTimeSlots,
@@ -227,5 +287,55 @@ module.exports = {
     getDoctorIncomes,
     getTimeSlotBookings,
     getDoctorBookings,
-    timeSlotById
+    timeSlotById,
+    userDoctorFrequency,
+    userDepartmentFrequency
    };
+
+
+   /*/////////////////
+depReservations:any[]=[ {
+    "name": "General Medicine",
+    "value": 3
+  }, {
+    "name": "Occupational Therapy",
+    "value": 5
+  }, {
+    "name": "Radiology",
+    "value": 7
+  }, {
+    "name": "Laboratory",
+    "value": 9
+  }, {
+    "name": "Speech Therapy",
+    "value": 10
+  }]
+depEarned: any[]=[{
+    "name": "General Medicine",
+    "series": [
+      {
+        "name": "January",
+        "value": 125
+      }, {
+        "name": "February",
+        "value": 197
+      }, {
+        "name": "March",
+        "value": 209
+      }
+    ]
+  }, {
+    "name": "Occupational Therapy",
+    "series": [
+      {
+        "name": "January",
+        "value": 210
+      }, {
+        "name": "February",
+        "value": 255
+      }, {
+        "name": "March",
+        "value": 203
+      }
+    ]
+    */

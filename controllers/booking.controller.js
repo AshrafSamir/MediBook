@@ -12,12 +12,17 @@ const createBooking = async (req, res) => {
     $and: [{ _id: timeSlotId }, { isHoliday: false }],
   });
   let user = await userModel.findOne({ username }, { password: 0, __v: 0 });
+  let doctorInfo = await doctorInfoModel.findOne({
+    doctorId: timeSlot.doctorId,
+  },{_id:0});
   if (req.user.username === user.username) {
     if (timeSlot) {
       if (timeSlot.fullyBooked === false) {
         let booking = await bookingModel.create({
           patientId: user._id,
           timeSlotId,
+          doctorId:timeSlot.doctorId,
+          departmentName:doctorInfo.specification
         });
         await timeSlotsModel.updateMany(
           { _id: timeSlotId },
@@ -30,10 +35,11 @@ const createBooking = async (req, res) => {
           );
         }
         let doctorUser = await userModel.findOne({_id:timeSlot.doctorId},{password:0, __v:0});
-        let doctorInfo = await doctorInfoModel.findOne({
-          doctorId: timeSlot.doctorId,
-        });
-        let doctor = {...doctorUser._doc,...doctorInfo._doc}
+      
+    
+        let doctor = {...doctorUser._doc,...doctorInfo._doc};
+        console.log(doctor);
+        
         let reservation = { user, timeSlot, doctor, booking:{...booking._doc,fees:timeSlot.bookingPrice} };
         res.json({ message: "session Booked successfully", reservation });
       } else {
