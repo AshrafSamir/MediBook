@@ -24,7 +24,7 @@ const addRate= async(req,res)=>{
                     let  doctorRate= ratesTemp.reduce((accumulator, currentValue)=>accumulator+currentValue)/doctorRates.length;
                     await doctorInfoModel.updateMany({doctorId},{$set:{doctorRate:doctorRate}});
                     let doctor = await doctorInfoModel.findOne({doctorId});
-                    res.json({message:"rateAdded successfully",userRate,doctor})
+                    res.json({message:"rating send successfully",userRate,doctor})
                 }
                 else{
                     res.json({message:"there is no rates for this doctor"})
