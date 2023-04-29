@@ -258,6 +258,25 @@ const userCounts = async(req,res)=>{
     res.status(400).json(err.message);
   }
 }
+const getDoctorById = async(req,res)=>{
+  let _id = req.params.id;
+  try{
+    let doctorUser = await userModel.findOne({_id});
+    let doctor={}
+    if(doctorUser){
+      let doctorInfo = await doctorInfoModel.findOne({doctorId:doctorUser._id});
+      doctor={...doctorUser._doc,...doctorInfo._doc};
+      res.json({doctor});
+    } 
+    else{
+      throw new Error("invalid doctor Id");
+    }
+  }
+  catch(err){
+    res.status(200).json(err.message);
+  }
+
+}
 module.exports = {
   signin,
   signup,
@@ -270,5 +289,6 @@ module.exports = {
   deleteUser,
   updateUser,
   searchDoctors,
-  userCounts
+  userCounts,
+  getDoctorById
 };

@@ -44,7 +44,8 @@ const mostRated = async(req,res)=>{
         let doctors=[];
         if(doctorsInfo ){
             for (let i = 0; i < doctorsInfo.length; i++) {
-                let doctorUser = await userModel.findOne({_id:doctorsInfo[i].doctorId});     
+                let doctorUser = await userModel.findOne({_id:doctorsInfo[i].doctorId});   
+                let ratesvalues = new Array(doctorsInfo.doctorRate);  
                 doctors.push({...doctorUser._doc,...doctorsInfo[i]._doc});       
             }
             res.json({doctors});
