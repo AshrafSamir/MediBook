@@ -223,15 +223,21 @@ const getDoctorIncomes = async (req,res)=>{
   const userDoctorFrequency = async(req,res)=>{
     const _id = req.params.id;
     let userFrequency=[];
+    let doctorId="";
     try{
       let user = await userModel.findOne({_id});
       if(user){
         let userBookings = await bookingModel.find({patientId:user._id});
         for (let i = 0; i < userBookings.length; i++) {
-          let doctorId= userBookings[i].doctorId;
-          let frequency = await bookingModel.count({patientId:user._id,doctorId})
-          if(frequency){
-            userFrequency.push({name:user.username,value:frequency});
+          if(doctorId.toString()!=userBookings[i].doctorId.toString()){
+            doctorId= userBookings[i].doctorId;
+            let frequency = await bookingModel.count({patientId:user._id,doctorId})
+            // console.log(doctorId);
+            let doctorUser = await userModel.findOne({_id:doctorId},{_id:0})
+            // console.log(doctorUser);
+            if(frequency){
+              userFrequency.push({name:doctorUser.username,value:frequency});
+            }
           }
         }
         if(userFrequency.length){
@@ -255,18 +261,21 @@ const getDoctorIncomes = async (req,res)=>{
       let user = await userModel.findOne({_id});
       let bookings = [];
       let userDeptFrequency =[];
+      let departmentName=""
       if(user){
         let userBookings = await bookingModel.find({patientId:user._id},{_id:0});;
         for (let i = 0; i < userBookings.length; i++) {
           let doctorInfo= await doctorInfoModel.findOne({doctorId:userBookings[i].doctorId});
-          let departmentName = doctorInfo.specification;
-          let frequency = await bookingModel.count({patientId:user._id,departmentName});
-          if(frequency){
-            userDeptFrequency.push({name:user.username,value:frequency});
+          if(departmentName != doctorInfo.specification){
+            departmentName = doctorInfo.specification;
+            let frequency = await bookingModel.count({patientId:user._id,departmentName});
+            if(frequency){
+              userDeptFrequency.push({name:departmentName,value:frequency});
+            }
           }
         }
         if(userDeptFrequency.length){
-          res.json(userDeptFrequency)
+          res.json({userDeptFrequency})
         }
         else{
           throw new Error("this user has no bookings")
