@@ -4,6 +4,7 @@ const doctorInfoModel = require("../models/doctorInfo.model");
 const bcrypt = require("bcrypt");
 const { check, validationResult } = require("express-validator");
 const { userValidation } = require("../validation/userSchema");
+const bookingModel = require("../models/booking.model");
 
 const signin = async (req, res) => {
   try {
@@ -246,9 +247,10 @@ const userCounts = async(req,res)=>{
   let admins = await userModel.count({type:"admin"});
   let patients = await userModel.count({type:"patient"});
   let doctors = await userModel.count({type:"doctor"});
+  let bookings = await bookingModel.count({});
   try{
     if(users){
-      res.json({numberOfUsers:users,numberOfAdmins:admins,numberOfDoctors:doctors,numberOfClients:patients})
+      res.json({numberOfUsers:users,numberOfAdmins:admins,numberOfDoctors:doctors,numberOfClients:patients,numberOfBookings:bookings})
     }
     else{
       throw new Error( "no users");
