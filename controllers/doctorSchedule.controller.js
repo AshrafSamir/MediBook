@@ -317,6 +317,30 @@ const getDoctorIncomes = async (req,res)=>{
       res.status(400).json(err.message);
     }
   }
+  const doctorsFrequency = async(req,res)=>{
+    try{
+      let bookings = await bookingModel.find({});
+      let doctorFrequency =[];
+      let doctorId=""
+      if(bookings){
+        for (let i = 0; i < bookings.length; i++) {
+          if(doctorId.toString()!=bookings[i].doctorId.toString()){
+            doctorId=bookings[i].doctorId;
+            let doctorUser = await userModel.findOne({_id:bookings[i].doctorId});  
+            let frequency = await bookingModel.count({doctorId:doctorId});
+            doctorFrequency.push({name:doctorUser.username,value:frequency})        
+          }
+        }
+        res.json({doctorFrequency})
+      }
+      else{
+        throw new Error("there is no bookings")
+      }
+    }
+    catch(err){
+      res.status(400).json(err.message)
+    }
+  }
 module.exports = { 
     createSchedule,
     doctorTimeSlots,
@@ -327,7 +351,8 @@ module.exports = {
     timeSlotById,
     userDoctorFrequency,
     userDepartmentFrequency,
-    departmentsFrequency
+    departmentsFrequency,
+    doctorsFrequency
    };
 
 

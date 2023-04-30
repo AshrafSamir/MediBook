@@ -8,7 +8,8 @@ const {
   timeSlotById,
   userDoctorFrequency,
   userDepartmentFrequency,
-  departmentsFrequency
+  departmentsFrequency,
+  doctorsFrequency
 } = require("../controllers/doctorSchedule.controller");
 
 doctorScheduleRoute.post("/createtimeslots/:id", auth, createSchedule);
@@ -19,5 +20,6 @@ doctorScheduleRoute.get("/gettimeslot/:id", timeSlotById);
 doctorScheduleRoute.get("/userDoctorsFrequency/:id", userDoctorFrequency);
 doctorScheduleRoute.get("/userDepartmentFrequency/:id", userDepartmentFrequency);
 doctorScheduleRoute.get("/departmentsFrequency", departmentsFrequency);
+doctorScheduleRoute.get("/doctorsFrequency", doctorsFrequency);
 
 module.exports = doctorScheduleRoute;
