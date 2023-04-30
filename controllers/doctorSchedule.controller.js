@@ -289,6 +289,34 @@ const getDoctorIncomes = async (req,res)=>{
       res.status(400).json(err.message);
     }
   }
+  const departmentsFrequency=async(req,res)=>{
+    try{
+      let bookings = await bookingModel.find({});
+      let deptFrequency=[]
+      let deptName="";
+      if(bookings.length){
+        for (let i = 0; i < bookings.length; i++) {
+          if(deptName!=bookings[i].departmentName){
+            deptName=bookings[i].departmentName
+            let frequency = await bookingModel.count({departmentName:deptName});
+            deptFrequency.push({name:deptName,value:frequency});
+          }
+        }
+        if(deptFrequency.length){
+          res.json({deptFrequency});
+        }
+        else{
+          throw new Error ("there is no bookings")
+        }
+      }
+      else{
+        throw new Error("there is no bookings")
+      }
+    }
+    catch(err){
+      res.status(400).json(err.message);
+    }
+  }
 module.exports = { 
     createSchedule,
     doctorTimeSlots,
@@ -298,7 +326,8 @@ module.exports = {
     getDoctorBookings,
     timeSlotById,
     userDoctorFrequency,
-    userDepartmentFrequency
+    userDepartmentFrequency,
+    departmentsFrequency
    };
 
 
