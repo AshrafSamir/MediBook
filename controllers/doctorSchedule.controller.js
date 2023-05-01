@@ -170,16 +170,20 @@ const getDoctorIncomes = async (req,res)=>{
     let doctorId = req.params.doctorId;
     let timeSlotId = req.params.timeSlotId;
     let timeSlot = await timeSlotsModel.findOne({doctorId,_id:timeSlotId});
+    let doctor={};
     let timeSlotBookings=[]
     if (timeSlot) {
+      let doctorUser = await userModel.findOne({_id:timeSlot.doctorId});
+      let doctorInfo= await doctorInfoModel.findOne({doctorId:doctorUser._id},{_id:0});
+      doctor={...doctorUser._doc,...doctorInfo._doc}
       let bookings = await bookingModel.find({timeSlotId});
       if(bookings.length){
         for (let i = 0; i < bookings.length; i++) {
           let user = await userModel.findOne({_id:bookings[i].patientId},{password:0,__v:0});
 
-          timeSlotBookings.push({...timeSlot._doc,user,...bookings[i]._doc})
+          timeSlotBookings.push({user,...bookings[i]._doc})
         }
-        res.json({timeSlotBookings,numberOfBookings:bookings.length})
+        res.json({timeSlotBookings,numberOfBookings:bookings.length,doctor,date:timeSlot.date,from:timeSlot.from,to:timeSlot.to})
       }
       else{
         res.json({message: "this time slot has not bookings"})
@@ -200,7 +204,7 @@ const getDoctorIncomes = async (req,res)=>{
           let bookings = await bookingModel.find({timeSlotId:timeSlots[i]._id});
           if(bookings.length){
             for (let j = 0; j < bookings.length; j++) {
-              let patient = await userModel.findOne({_id:bookings[i].patientId})
+              let patient = await userModel.findOne({_id:bookings[j].patientId})
               doctorBookings.push({timeSlot:timeSlots[i],patient,booking:bookings[i]});              
             }
           }          

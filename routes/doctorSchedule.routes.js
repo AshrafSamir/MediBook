@@ -9,7 +9,8 @@ const {
   userDoctorFrequency,
   userDepartmentFrequency,
   departmentsFrequency,
-  doctorsFrequency
+  doctorsFrequency,
+  getDoctorBookings
 } = require("../controllers/doctorSchedule.controller");
 
 doctorScheduleRoute.post("/createtimeslots/:id", auth, createSchedule);
@@ -18,6 +19,7 @@ doctorScheduleRoute.get("/getDoctorsInfo", getDoctorsInfo);
 doctorScheduleRoute.get("/gettimeSlotbookings/:doctorId/:timeSlotId", getTimeSlotBookings);
 doctorScheduleRoute.get("/gettimeslot/:id", timeSlotById);
 doctorScheduleRoute.get("/userDoctorsFrequency/:id", userDoctorFrequency);
+doctorScheduleRoute.get("/getDoctorBookings/:id", getDoctorBookings);
 doctorScheduleRoute.get("/userDepartmentFrequency/:id", userDepartmentFrequency);
 doctorScheduleRoute.get("/departmentsFrequency", departmentsFrequency);
 doctorScheduleRoute.get("/doctorsFrequency", doctorsFrequency);
