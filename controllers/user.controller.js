@@ -11,6 +11,12 @@ const signin = async (req, res) => {
     const { credential, password } = req.body;
     console.log(req.body);
     let user = await userModel.findByCredentials(credential, password);
+    // if (user.type === "doctor") {
+    //   let doctorInfo = await doctorInfoModel.findOne({ doctorId: user._id });
+    //   if (doctorInfo.status !== "accepted") {
+    //     throw new Error(`Your account is ${doctorInfo.status}`);
+    //   }
+    // }
     let token = await user.generateAuthToken(req, res);
     res.json({
       message: "user signed in successfully",
