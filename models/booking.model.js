@@ -11,6 +11,15 @@ const bookingSchema = mongoose.Schema({
         ref:"user",
         require:true,
     },
+    doctorId:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"user",
+        require:true,
+    },
+    departmentName:{
+        type:String,
+        require:true,
+    },
     ended:{
         type:Boolean,
         default:false

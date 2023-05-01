@@ -4,6 +4,7 @@ const doctorInfoModel = require("../models/doctorInfo.model");
 const bcrypt = require("bcrypt");
 const { check, validationResult } = require("express-validator");
 const { userValidation } = require("../validation/userSchema");
+const bookingModel = require("../models/booking.model");
 
 const signin = async (req, res) => {
   try {
@@ -37,7 +38,7 @@ const signup = async (req, res) => {
   if (user) {
     res.json({ message: "already logged" });
   } else {
-    if (imageUrl) {
+    if (req.file) {
       user = await userModel.create({
         ...req.body,
         imageUrl: `http://localhost:3000/${req.file.path}`,
@@ -72,8 +73,15 @@ const signup = async (req, res) => {
 };
 
 const createUser = async (req, res) => {
-  const { username, email, mobilePhone, clinicAddress, specification, role } =
-    req.body;
+  const {
+    username,
+    email,
+    mobilePhone,
+    clinicAddress,
+    specification,
+    role,
+    type,
+  } = req.body;
   if (req.user.type === "admin") {
     let user = await userModel.findOne({
       $or: [{ username }, { email }, { mobilePhone }],
@@ -173,20 +181,6 @@ const getUserByid = async (req, res) => {
   }
 };
 
-const getDoctorById = async (req, res) => {
-  try {
-    const { id } = req.params;
-    let doctor = await userModel.findOne({ _id: id, type: "doctor" });
-    let doctorInfo = await doctorInfoModel.findOne({ doctorId: id });
-    if (!doctor) {
-      res.json({ message: "invalid doctor ID" });
-    }
-    res.json({ ...doctor._doc, ...doctorInfo._doc });
-  } catch (error) {
-    res.status(400).json(error.message);
-  }
-};
-
 const getAllDoctors = async (req, res) => {
   let doctors = await userModel.find({ type: "doctor" });
   let allDoctorsData = [];
@@ -222,6 +216,94 @@ const getAllClients = async (req, res) => {
   }
 };
 
+/**
+ * [ ]
+ */
+
+const searchDoctors = async (req, res) => {
+  const { name, specification, clinicAddress } = req.query;
+  let doctorInfoKeys = {};
+  let doctorUserKeys = {};
+  name ? (doctorUserKeys.name = name) : null;
+  console.log("doctorUserKeys", doctorUserKeys);
+  let doctors = await userModel.find({
+    $and: [{ type: "doctor" }, { ...doctorUserKeys }],
+  });
+  console.log("doctors", doctors);
+  let allDoctorsData = [];
+  specification ? (doctorInfoKeys.specification = specification) : null;
+  clinicAddress ? (doctorInfoKeys.clinicAddress = clinicAddress) : null;
+  console.log("doctorInfoKeys", { ...doctorInfoKeys });
+  for (let i = 0; i < doctors.length; i++) {
+    let doctorInfo = await doctorInfoModel.findOne({
+      doctorId: doctors[i]._id,
+      ...doctorInfoKeys,
+    });
+    // console.log(doctors[i]._id);
+    console.log(doctorInfo);
+    if (doctorInfo) {
+      allDoctorsData.push({ ...doctors[i]._doc, ...doctorInfo._doc });
+    }
+  }
+  if (doctors.length) {
+    res.json({ allDoctorsData, numberOfDoctors: doctors.length });
+  } else {
+    res.json({ message: "there is no doctors" });
+  }
+};
+const userCounts = async (req, res) => {
+  let users = await userModel.count({});
+  let admins = await userModel.count({ type: "admin" });
+  let patients = await userModel.count({ type: "patient" });
+  let doctors = await userModel.count({ type: "doctor" });
+  let bookings = await bookingModel.count({});
+  try {
+    if (users) {
+      res.json({
+        numberOfUsers: users,
+        numberOfAdmins: admins,
+        numberOfDoctors: doctors,
+        numberOfClients: patients,
+        numberOfBookings: bookings,
+      });
+    } else {
+      throw new Error("no users");
+    }
+  } catch (err) {
+    res.status(400).json(err.message);
+  }
+};
+const getDoctor = async (req, res) => {
+  let _id = req.params.id;
+  try {
+    let doctorUser = await userModel.findOne({ _id });
+    let doctor = {};
+    if (doctorUser) {
+      let doctorInfo = await doctorInfoModel.findOne({
+        doctorId: doctorUser._id,
+      });
+      doctor = { ...doctorUser._doc, ...doctorInfo._doc };
+      res.json({ doctor });
+    } else {
+      throw new Error("invalid doctor Id");
+    }
+  } catch (err) {
+    res.status(200).json(err.message);
+  }
+};
+const getDoctorById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    let doctor = await userModel.findOne({ _id: id, type: "doctor" });
+    let doctorInfo = await doctorInfoModel.findOne({ doctorId: id });
+    if (!doctor) {
+      res.json({ message: "invalid doctor ID" });
+    }
+    res.json({ ...doctor._doc, ...doctorInfo._doc });
+  } catch (error) {
+    res.status(400).json(error.message);
+  }
+};
 module.exports = {
   signin,
   signup,
@@ -234,4 +316,7 @@ module.exports = {
   deleteUser,
   updateUser,
   getDoctorById,
+  getDoctor,
+  searchDoctors,
+  userCounts,
 };

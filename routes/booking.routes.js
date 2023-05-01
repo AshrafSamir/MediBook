@@ -6,6 +6,7 @@ const { createBooking,
         getBookingById,
         getBookingData,
         getBookingbyPatientId,
+        getUserBookings,
 } = require("../controllers/booking.controller");
 const multer = require("multer");
 var storage = multer.diskStorage({
@@ -42,4 +43,5 @@ bookingRoute.post("/addbookingdata/:id", auth, bookingAttachments.single("bookin
 bookingRoute.get("/allbookings",getAllBookings)
 bookingRoute.get("/booking/:id",getBookingById)
 bookingRoute.get("/bookingdata/:id",getBookingData)
+bookingRoute.get("/userbookings/:id",getUserBookings)
 module.exports = bookingRoute;

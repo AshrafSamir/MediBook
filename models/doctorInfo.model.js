@@ -10,5 +10,6 @@ const doctorInfoSchema = mongoose.Schema({
   role: { type: String, default: "human", enum: ["human", "veterinary"] },
   clinicAddress: { type: String, require: true },
   availability: { type: Boolean, default: true },
+  doctorRate:{type:Number , default:null}
 });
 module.exports = mongoose.model("doctorInfo", doctorInfoSchema);
