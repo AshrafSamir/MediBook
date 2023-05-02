@@ -381,6 +381,58 @@ const getDoctorIncomes = async (req,res)=>{
       res.status(400).json(err.message)
     }
   }
+
+  const userDepartmentOutcomes= async(req,res)=>{
+    let _id = req.params.id;
+    try{
+      let user = await userModel.findOne({_id});
+      let timeSlots = [];
+      let bookings = [];
+      let DeptIncomes =[];
+      let departmentName=""
+      /**
+       * {
+    "name": "General Medicine","series": [{"name": "January","value": 125}, {"name": "February","value": 197}, {"name": "March","value": 209
+      }
+    ]
+  }
+       */
+      if(user){
+        let userBookings = await bookingModel.find({patientId:user._id});;
+        let deptName = ""
+        for (let i = 0; i < userBookings.length; i++) {
+          let timeSlot = await timeSlotsModel.findOne({_id:userBookings[i].timeSlotId});
+          timeSlots.push({...timeSlot._doc,...userBookings[i]._doc})
+        }
+       
+        deptName="";
+        for (let i = 0; i < timeSlots.length; i++) {
+          let temp={};
+          if(deptName!==timeSlots[i].departmentName){
+            deptName=timeSlots[i].departmentName;
+            temp.name=deptName;
+            temp.series=[]
+            for (let j = 3; j >= 0; j--) {
+              let frequency = timeSlots.filter((e)=>{
+                return moment(e.date).format("MMMM")==moment().subtract(j,"months").format("MMMM")&&e.departmentName===deptName
+              }).length;
+              let month =moment().subtract(j,"months").format("MMMM")
+              console.log(month);
+              temp.series.push({name:month,value:frequency});
+            }
+            DeptIncomes.push(temp);
+          }
+        }
+        res.json({DeptIncomes})
+      }
+      else{
+        throw new Error("invalid User ID")
+      }
+    }
+    catch(err){
+      res.status(400).json(err.message);
+    }
+  }
 module.exports = { 
     createSchedule,
     doctorTimeSlots,
@@ -393,7 +445,8 @@ module.exports = {
     userDepartmentFrequency,
     departmentsFrequency,
     doctorsFrequency,
-    doctorTimeSlotGraph
+    doctorTimeSlotGraph,
+    userDepartmentOutcomes
    };
 
 
