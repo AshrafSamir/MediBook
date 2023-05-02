@@ -345,6 +345,42 @@ const getDoctorIncomes = async (req,res)=>{
       res.status(400).json(err.message)
     }
   }
+  const doctorTimeSlotGraph = async(req,res)=>{
+    let _id = req.params.id
+    let graph=[]
+    try{
+      let doctorInfo = await doctorInfoModel.findOne({doctorId:_id});
+      if(doctorInfo){
+        let timeSlots = await timeSlotsModel.find({doctorId:_id});
+        if(timeSlots){
+/**
+ * [{name:"25-4",series:{name:00:00-04:00,value:4}}]
+ */
+          for (let i = 0; i < timeSlots.length; i++) {
+            if(timeSlots[i].reservations>0){
+              let graphItem={
+                name:moment(timeSlots[i].date).format("YYYY-MM-DD"),
+                series:[{name:`${moment(timeSlots[i].from).format("hh:mm")}-${moment(timeSlots[i].to).format("hh:mm")}`,
+                        value:timeSlots[i].reservations}]
+              };
+              graph.push(graphItem)
+            }
+          }
+
+          res.json({graph})
+        }
+        else{
+          throw new Error ("this doctor has no timeSlots")
+        }
+      }
+      else{
+        throw new Error ("invalid Doctor ID")
+      }
+    }
+    catch(err){
+      res.status(400).json(err.message)
+    }
+  }
 module.exports = { 
     createSchedule,
     doctorTimeSlots,
@@ -356,7 +392,8 @@ module.exports = {
     userDoctorFrequency,
     userDepartmentFrequency,
     departmentsFrequency,
-    doctorsFrequency
+    doctorsFrequency,
+    doctorTimeSlotGraph
    };
 
 
