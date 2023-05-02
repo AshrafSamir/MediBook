@@ -11,14 +11,14 @@ const doctorInfoSchema = mongoose.Schema({
   clinicAddress: { type: String, require: true },
   availability: { type: Boolean, default: true },
   doctorRate: { type: Number, default: null },
-  // certificate: {
-  //   type: String,
-  //   default: null,
-  // },
-  // status: {
-  //   type: String,
-  //   default: "pending",
-  //   enum: ["pending", "rejected", "accepted"],
-  // },
+  certificate: {
+    type: String,
+    default: null,
+  },
+  status: {
+    type: String,
+    default: "pending",
+    enum: ["pending", "rejected", "accepted"],
+  },
 });
 module.exports = mongoose.model("doctorInfo", doctorInfoSchema);

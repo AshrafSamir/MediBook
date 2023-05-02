@@ -21,9 +21,23 @@ const {
   getDoctorIncomes,
   getDoctorBookings,
 } = require("../controllers/doctorSchedule.controller");
-var storage = multer.diskStorage({
+// var storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, "uploads/profileImages");
+//   },
+//   filename: function (req, file, cb) {
+//     x = file.originalname.replace(/\s+/g, "");
+//     cb(null, Date.now() + x);
+//   },
+// });
+var testStorage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/profileImages");
+    if(file.fieldname==="profileImage"){
+      cb(null, "uploads/profileImages");
+    }
+    else if(file.fieldname==="certificate"){
+      cb(null, "uploads/certificates");
+    }
   },
   filename: function (req, file, cb) {
     x = file.originalname.replace(/\s+/g, "");
@@ -32,30 +46,49 @@ var storage = multer.diskStorage({
 });
 function fileFilter(req, file, cb) {
   let extension = file.mimetype;
-  if (
-    extension != "image/png" &&
-    extension != "image/jpg" &&
-    extension != "image/jpeg" &&
-    extension != "image/webp"
-  ) {
-    cb(null, false);
-  } else {
-    cb(null, true);
+  if(file.fieldname==="profileImage"){
+    if (
+      extension != "image/png" &&
+      extension != "image/jpg" &&
+      extension != "image/jpeg" &&
+      extension != "image/webp"
+    ) {
+      cb(null, false);
+    } else {
+      cb(null, true);
+    }
+  }
+  else if (file.fieldname==="certificate"){
+    if (
+      extension != "image/png" &&
+      extension != "image/jpg" &&
+      extension != "image/jpeg" &&
+      extension != "image/webp"&&
+      extension!="application/pdf"&&
+      extension!="application/msword"
+    ) {
+      cb(null, false);
+    } else {
+      cb(null, true);
+    }
   }
 }
 const userImage = multer({
-  dest: "uploads/profileImages",
-  storage,
+  storage:testStorage,
   fileFilter,
 });
 userRoute.post("/signin", signin);
-userRoute.post("/signup", userImage.single("profileImage"), signup);
-userRoute.post(
-  "/createUser",
-  userImage.single("profileImage"),
-  auth,
-  createUser
-);
+userRoute.post("/signup", userImage.fields([{
+  name: 'profileImage', maxCount: 1
+}, {
+  name: 'certificate', maxCount: 1
+}]), signup);
+// userRoute.post(
+//   "/createUser",
+//   userImage.single("profileImage"),
+//   auth,
+//   createUser
+// );
 userRoute.delete("/deleteuser/:id", auth, deleteUser);
 userRoute.patch(
   "/updateuser/:id",
