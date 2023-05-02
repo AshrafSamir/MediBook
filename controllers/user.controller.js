@@ -11,12 +11,12 @@ const signin = async (req, res) => {
     const { credential, password } = req.body;
     console.log(req.body);
     let user = await userModel.findByCredentials(credential, password);
-    // if (user.type === "doctor") {
-    //   let doctorInfo = await doctorInfoModel.findOne({ doctorId: user._id });
-    //   if (doctorInfo.status !== "accepted") {
-    //     throw new Error(`Your account is ${doctorInfo.status}`);
-    //   }
-    // }
+    if (user.type === "doctor") {
+      let doctorInfo = await doctorInfoModel.findOne({ doctorId: user._id });
+      if (doctorInfo.status !== "accepted") {
+        throw new Error(`Your account is ${doctorInfo.status}`);
+      }
+    }
     let token = await user.generateAuthToken(req, res);
     res.json({
       message: "user signed in successfully",
@@ -44,10 +44,10 @@ const signup = async (req, res) => {
   if (user) {
     res.json({ message: "already logged" });
   } else {
-    if (req.file) {
+    if (req.files.profileImage) {
       user = await userModel.create({
         ...req.body,
-        imageUrl: `http://localhost:3000/${req.file.path}`,
+        imageUrl: `http://localhost:3000/${req.files.profileImage[0].path}`,
       });
     } else {
       user = await userModel.create({
@@ -55,21 +55,29 @@ const signup = async (req, res) => {
       });
     }
 
-    let token = await user.generateAuthToken(req, res);
-
+    
     if (user.type === "doctor") {
-      let doctorInfo = await doctorInfoModel.create({
-        doctorId: user._id,
-        clinicAddress,
-        specification,
-        role,
-      });
-      user.doctorInfo = doctorInfo;
-      res.json({
-        message: "User create succesfully",
-        user: { ...user._doc, ...doctorInfo._doc, token },
-      });
+      if(req.files.certificate){
+        let doctorInfo = await doctorInfoModel.create({
+          doctorId: user._id,
+          clinicAddress,
+          specification,
+          role,
+          certificate: `http://localhost:3000/${req.files.certificate[0].path}`,
+        });
+        user.doctorInfo = doctorInfo;
+        res.json({
+          message: "User create succesfully",
+          user: { ...user._doc, ...doctorInfo._doc},
+          status:doctorInfo.status,
+        });
+      }
+      else{
+        await userModel.deleteOne({_id:user._id});
+        res.json({message:"you must upload certificate"})
+      }
     } else {
+      let token = await user.generateAuthToken(req, res);
       res.json({
         message: "User create succesfully",
         user: { ...user._doc, token },
@@ -125,6 +133,7 @@ const deleteUser = async (req, res) => {
   let _id = req.params.id;
   if (req.user.type === "admin") {
     await userModel.deleteOne({ _id });
+    await doctorInfoModel.deleteOne({doctorId:_id});
     user = await userModel.findOne({ _id });
     if (!user) {
       res.json({ message: "user Deleted successfully" });
@@ -133,6 +142,33 @@ const deleteUser = async (req, res) => {
     }
   }
 };
+
+
+const updateDoctorStatus = async(req,res)=>{
+  let doctorId = req.params.id;
+  const {status} = req.body;
+  try{
+    if(req.user.type === "admin"){
+      let doctorInfo= await doctorInfoModel.findOne({doctorId});
+      if(doctorInfo){
+        await doctorInfoModel.updateOne({doctorId},{$set:{status:status}});
+        doctorInfo=await doctorInfoModel.findOne({doctorId},{_id:0});
+        let doctorUser = await userModel.findOne({_id:doctorId});
+        let doctor = {...doctorUser._doc,...doctorInfo._doc};
+        res.json({doctor});
+      }
+      else{
+        throw new Error("invalid Doctor ID")
+      }
+    }
+    else{
+      throw new Error ("unAuthorized")
+    }
+  }
+  catch(err){
+    res.status(400).json(err.message)
+  }
+}
 
 const updateUser = async (req, res) => {
   const { error, value } = userValidation.validate(req.body);
@@ -304,7 +340,7 @@ const getDoctorById = async (req, res) => {
     let doctorInfo = await doctorInfoModel.findOne({ doctorId: id });
     if (!doctor) {
       res.json({ message: "invalid doctor ID" });
-    }
+}
     res.json({ ...doctor._doc, ...doctorInfo._doc });
   } catch (error) {
     res.status(400).json(error.message);
@@ -325,4 +361,6 @@ module.exports = {
   getDoctor,
   searchDoctors,
   userCounts,
+  getDoctorById,
+  updateDoctorStatus
 };
