@@ -15,6 +15,7 @@ const {
   userCounts,
   getDoctor,
   getDoctorById,
+  updateDoctorStatus,
 } = require("../controllers/user.controller");
 const multer = require("multer");
 const {
@@ -96,6 +97,7 @@ userRoute.patch(
   auth,
   updateUser
 );
+userRoute.patch("/editDoctorStatus/:id",auth,updateDoctorStatus)
 userRoute.get("/allusers", getAllUsers);
 userRoute.get("/user/:id", getUserByid);
 userRoute.get("/alldoctors", getAllDoctors);
