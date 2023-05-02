@@ -23,6 +23,10 @@ const bookingSchema = mongoose.Schema({
     ended:{
         type:Boolean,
         default:false
+    },
+    doctorInstructions:{
+        type:String,
+        default:null
     }
 
 });

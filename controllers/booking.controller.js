@@ -208,13 +208,68 @@ const getUserBookings = async(req,res)=>{
     res.json({message:"invalid user ID"})
   }
 }
+const addDoctorInstructions = async(req,res)=>{
+  let bookingId = req.params.id;
+  try{
+    const {doctorInstructions,username} = req.body;
+    if(req.user.type === "doctor"){
+      let booking= await bookingModel.findOne({_id:bookingId});
+      if(booking){
+        let doctor = await userModel.findOne({username});
+        if(doctor){
+          await bookingModel.updateOne({_id:bookingId},{$set:{doctorInstructions:doctorInstructions}});
+          booking= await bookingModel.findOne({_id:bookingId});
+          res.json({message:"instructions added successfully",booking});
+        }
+        else{
+          throw new Error ("invalid doctor ID")
+        }
+      }
+      else{
+        
+        throw new Error ("invalid booking ID")
+      }
+    }
+    else{
+      throw new Error ("unAuthorized")
+    }
 
+  }
+  catch(err){
+    res.status(400).json(err.message)
+  }
+}
+const endBooking = async(req,res)=>{
+  const _id=req.params.id;
+  try{
+    if(req.user.type=="doctor"){
+      let booking=await bookingModel.findOne({_id});
+      if(booking){
+        await bookingModel.updateOne({_id},{$set:{ended:true}});
+          booking= await bookingModel.findOne({_id});
+          res.json({message:"instructions added successfully",booking});
+      }
+      else{
+        throw new Error ("invalid Booking ID")
+      }
+
+    }
+    else{
+      throw new Error("unAuthorized")
+    }
+  }
+  catch(err){
+    res.status(400).json(err.message)
+  }
+}
 module.exports = {
   createBooking,
   addBookingData,
   getAllBookings,
   getBookingById,
   getBookingData,
-  getUserBookings
+  getUserBookings,
+  addDoctorInstructions,
+  endBooking
 };
 
