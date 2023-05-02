@@ -417,7 +417,6 @@ const getDoctorIncomes = async (req,res)=>{
                 return moment(e.date).format("MMMM")==moment().subtract(j,"months").format("MMMM")&&e.departmentName===deptName
               }).length;
               let month =moment().subtract(j,"months").format("MMMM")
-              console.log(month);
               temp.series.push({name:month,value:frequency});
             }
             DeptIncomes.push(temp);
