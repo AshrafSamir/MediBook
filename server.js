@@ -25,7 +25,7 @@ app.use(timeSlotRoute);
 app.use(rateRoute);
 //mongodb://127.0.0.1:27017/gpiti
 
-mongoose.connect(process.env.MONGODB_URL, {
+mongoose.connect("mongodb+srv://admin:admin@cluster0.vk4zz.mongodb.net/gpiti", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
