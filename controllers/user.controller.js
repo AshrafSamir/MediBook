@@ -229,7 +229,7 @@ const getAllDoctors = async (req, res) => {
   for (let i = 0; i < doctors.length; i++) {
     let doctorInfo = await doctorInfoModel.findOne({
       doctorId: doctors[i]._id,
-    });
+    },{_id:0});
     console.log(doctors[i]._id);
     allDoctorsData.push({ ...doctors[i]._doc, ...doctorInfo._doc });
   }
