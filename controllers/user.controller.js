@@ -14,6 +14,7 @@ const signin = async (req, res) => {
     if (user.type === "doctor") {
       let doctorInfo = await doctorInfoModel.findOne({ doctorId: user._id });
       if (doctorInfo.status !== "accepted") {
+        // res.json({message:"your account is "+doctorInfo.status});
         throw new Error(`Your account is ${doctorInfo.status}`);
       }
     }
@@ -23,7 +24,7 @@ const signin = async (req, res) => {
       user: { ...user._doc, token },
     });
   } catch (error) {
-    res.status(400).json(error.message);
+    res.status(200).json(error.message);
   }
 };
 
@@ -166,7 +167,7 @@ const updateDoctorStatus = async(req,res)=>{
     }
   }
   catch(err){
-    res.status(400).json(err.message)
+    res.status(200).json(err.message)
   }
 }
 
