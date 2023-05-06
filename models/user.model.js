@@ -42,7 +42,7 @@ userSchema.methods.generateAuthToken = async function (req, res) {
   const user = this;
   const token = jwt.sign(
     { role: user.type, username: user.username, _id: user._id.toString() },
-    process.env.JWT_SECRET
+    "thisisasecretformyapp"
   );
 
   res.setHeader("auth", token);
