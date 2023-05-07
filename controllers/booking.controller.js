@@ -264,6 +264,36 @@ const endBooking = async(req,res)=>{
     res.status(400).json(err.message)
   }
 }
+const patientHistory = async ( req,res)=>{
+  const patientId = req.params.id;
+  let history=[];
+  try{
+    let bookings = await bookingModel.find({patientId},{_id:0});
+    let patient = await userModel.findOne({_id:patientId});
+    if(bookings.length){
+      for (let i = 0; i < bookings.length; i++) {
+        let doctor={};
+        let doctorUser= await userModel.findOne({_id:bookings[i].doctorId},{_id:0,name:1,username:1,mobilePhone:1});
+        let timeSlot = await timeSlotsModel.findOne({_id:bookings[i].timeSlotId},{_id:0});
+        let doctorInfo= await doctorInfoModel.findOne({doctorId:bookings[i].doctorId},{_id:0,specification:1});
+        doctor={...doctorUser._doc,...doctorInfo._doc}
+        history.push({doctor,...bookings[i]._doc,...timeSlot._doc})
+      }
+      if(history.length){
+        res.json({patient,history})
+      }
+      else{
+        throw new Error ("this user hasn't history")
+      }
+    }
+    else{
+      throw new Error("this patient has no bookings")
+    }
+  }
+  catch (err){
+    res.status(200).json(err.message);
+  }
+}
 module.exports = {
   createBooking,
   addBookingData,
@@ -272,6 +302,7 @@ module.exports = {
   getBookingData,
   getUserBookings,
   addDoctorInstructions,
-  endBooking
+  endBooking,
+  patientHistory
 };
 

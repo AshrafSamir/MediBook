@@ -9,6 +9,7 @@ const { createBooking,
         getUserBookings,
         addDoctorInstructions,
         endBooking,
+        patientHistory,
 } = require("../controllers/booking.controller");
 const multer = require("multer");
 var storage = multer.diskStorage({
@@ -48,4 +49,5 @@ bookingRoute.get("/bookingdata/:id",getBookingData)
 bookingRoute.get("/userbookings/:id",getUserBookings)
 bookingRoute.patch("/addDoctorInstructions/:id",auth,addDoctorInstructions)
 bookingRoute.patch("/endBooking/:id",auth,endBooking)
+bookingRoute.get("/patientHistory/:id",patientHistory)
 module.exports = bookingRoute;
