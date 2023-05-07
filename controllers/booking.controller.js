@@ -17,7 +17,9 @@ const createBooking = async (req, res) => {
   },{_id:0});
   if (req.user.username === user.username) {
     if (timeSlot) {
-      if (timeSlot.fullyBooked === false) {
+      let checkTime = (new Date(timeSlot.from) > Date.now());
+      console.log(checkTime);
+      if (timeSlot.fullyBooked === false && checkTime) {
         let booking = await bookingModel.create({
           patientId: user._id,
           timeSlotId,
