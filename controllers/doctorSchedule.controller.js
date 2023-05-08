@@ -94,7 +94,7 @@ const doctorTimeSlots = async (req, res) => {
       throw new Error("this doctor has no timeSlots");
     }
   } catch (err) {
-    res.status(400).json(err.message);
+    res.status(200).json(err.message);
   }
 };
 const timeSlotById = async(req,res)=>{
@@ -112,7 +112,7 @@ const timeSlotById = async(req,res)=>{
     }
   }
   catch(err){
-    res.status(400).json(err.message);
+    res.status(200).json(err.message);
   }
 }
 const getDoctorsInfo = async (req, res) => {
@@ -124,7 +124,7 @@ const getDoctorsInfo = async (req, res) => {
       throw new Error("there is no doctors info");
     }
   } catch (err) {
-    res.status(400).json(err.message);
+    res.status(200).json(err.message);
   }
 };
 const getDoctorIncomes = async (req,res)=>{
@@ -256,7 +256,7 @@ const getDoctorIncomes = async (req,res)=>{
       }
     }
     catch(err){
-      res.status(400).json(err.message);
+      res.status(200).json(err.message);
     }
   }
   const userDepartmentFrequency=async(req,res)=>{
@@ -290,7 +290,7 @@ const getDoctorIncomes = async (req,res)=>{
       }
     }
     catch(err){
-      res.status(400).json(err.message);
+      res.status(200).json(err.message);
     }
   }
   const departmentsFrequency=async(req,res)=>{
@@ -318,7 +318,7 @@ const getDoctorIncomes = async (req,res)=>{
       }
     }
     catch(err){
-      res.status(400).json(err.message);
+      res.status(200).json(err.message);
     }
   }
   const doctorsFrequency = async(req,res)=>{
@@ -342,7 +342,7 @@ const getDoctorIncomes = async (req,res)=>{
       }
     }
     catch(err){
-      res.status(400).json(err.message)
+      res.status(200).json(err.message)
     }
   }
   const doctorTimeSlotGraph = async(req,res)=>{
@@ -378,7 +378,7 @@ const getDoctorIncomes = async (req,res)=>{
       }
     }
     catch(err){
-      res.status(400).json(err.message)
+      res.status(200).json(err.message)
     }
   }
 
@@ -429,7 +429,7 @@ const getDoctorIncomes = async (req,res)=>{
       }
     }
     catch(err){
-      res.status(400).json(err.message);
+      res.status(200).json(err.message);
     }
   }
 module.exports = { 

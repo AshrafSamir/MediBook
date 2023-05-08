@@ -238,7 +238,7 @@ const addDoctorInstructions = async(req,res)=>{
 
   }
   catch(err){
-    res.status(400).json(err.message)
+    res.status(200).json(err.message)
   }
 }
 const endBooking = async(req,res)=>{
@@ -261,7 +261,7 @@ const endBooking = async(req,res)=>{
     }
   }
   catch(err){
-    res.status(400).json(err.message)
+    res.status(200).json(err.message)
   }
 }
 const patientHistory = async ( req,res)=>{

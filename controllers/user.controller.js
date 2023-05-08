@@ -313,7 +313,7 @@ const userCounts = async (req, res) => {
       throw new Error("no users");
     }
   } catch (err) {
-    res.status(400).json(err.message);
+    res.status(200).json(err.message);
   }
 };
 const getDoctor = async (req, res) => {
@@ -344,7 +344,7 @@ const getDoctorById = async (req, res) => {
 }
     res.json({ ...doctor._doc, ...doctorInfo._doc });
   } catch (error) {
-    res.status(400).json(error.message);
+    res.status(200).json(error.message);
   }
 };
 module.exports = {
