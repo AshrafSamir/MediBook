@@ -66,11 +66,17 @@ const signup = async (req, res) => {
           certificate: `https://medibook-service.onrender.com/${req.files.certificate[0].path}`,
         });
         user.doctorInfo = doctorInfo;
-        res.json({
-          message: "User create succesfully",
-          user: { ...user._doc, ...doctorInfo._doc },
-          status: doctorInfo.status,
-        });
+        if(!doctorInfo){
+          await userModel.deleteOne({_id:user._id});
+          res.json({message:"please enter doctor required fields"});
+        }
+        else{
+          res.json({
+            message: "User create succesfully",
+            user: { ...user._doc, ...doctorInfo._doc },
+            status: doctorInfo.status,
+          });
+        }
       } else {
         await userModel.deleteOne({ _id: user._id });
         res.json({ message: "you must upload certificate" });
