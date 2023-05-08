@@ -57,7 +57,7 @@ const signup = async (req, res) => {
     }
 
     if (user.type === "doctor") {
-      if (req.files.certificate) {
+      if (req.files.certificate && specification && clinicAddress) {
         let doctorInfo = await doctorInfoModel.create({
           doctorId: user._id,
           clinicAddress,
@@ -79,7 +79,7 @@ const signup = async (req, res) => {
         }
       } else {
         await userModel.deleteOne({ _id: user._id });
-        res.json({ message: "you must upload certificate" });
+        res.json({ message: "you must add doctor required fields (specification, clinic Address , certificate)" });
       }
     } else {
       let token = await user.generateAuthToken(req, res);
